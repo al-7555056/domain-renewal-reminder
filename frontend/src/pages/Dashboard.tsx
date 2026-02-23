@@ -93,18 +93,29 @@ export function Dashboard() {
   const uniqueReminderCounts = Array.from(new Set(domains.map(d => d.reminderCount))).sort((a, b) => a - b);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full ink-wash-bg relative">
+      <div className="ink-pattern"></div>
+      
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="glass-card border-b border-gray-200/50 sticky top-0 z-40 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">域名续期提醒</h1>
-              <p className="text-sm text-gray-600 mt-1">欢迎，{user?.email}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg animate-float">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gradient">
+                  爱自由域名管理
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">欢迎，{user?.email}</p>
+              </div>
             </div>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 transition"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100/80 rounded-lg transition-all font-medium"
             >
               退出登录
             </button>
@@ -113,75 +124,114 @@ export function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm font-medium text-gray-600 mb-2">总域名数</div>
-            <div className="text-3xl font-bold text-gray-900">{domains.length}</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-slideUp">
+          <div className="glass-card rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-xs sm:text-sm font-semibold text-gray-600 mb-1">总域名数</div>
+            <div className="text-3xl sm:text-4xl font-bold text-gray-800">
+              {domains.length}
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm font-medium text-gray-600 mb-2">即将到期</div>
-            <div className="text-3xl font-bold text-orange-600">
+          
+          <div className="glass-card rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-xs sm:text-sm font-semibold text-gray-600 mb-1">即将到期</div>
+            <div className="text-3xl sm:text-4xl font-bold text-gray-800">
               {domains.filter(d => getDaysUntilExpiry(d.expiryDate) <= 30).length}
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm font-medium text-gray-600 mb-2">已发送提醒</div>
-            <div className="text-3xl font-bold text-green-600">
+          
+          <div className="glass-card rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-xs sm:text-sm font-semibold text-gray-600 mb-1">已发送提醒</div>
+            <div className="text-3xl sm:text-4xl font-bold text-gray-800">
               {domains.reduce((sum, d) => sum + d.remindersSent, 0)}
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">我的域名</h2>
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">我的域名</h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-600 transition"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            + 添加域名
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            添加域名
           </button>
         </div>
 
         {/* Filters and View Mode */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">筛选和视图</h3>
-            <div className="flex gap-2">
+        <div className="glass-card rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3 sm:gap-0">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              筛选和视图
+            </h3>
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-lg transition ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
                   viewMode === 'list'
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                列表视图
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span className="hidden sm:inline">列表</span>
               </button>
               <button
                 onClick={() => setViewMode('grouped')}
-                className={`px-4 py-2 rounded-lg transition ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
                   viewMode === 'grouped'
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                分组视图
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span className="hidden sm:inline">分组</span>
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 续期网址
               </label>
               <select
                 value={filterRenewalUrl}
                 onChange={(e) => setFilterRenewalUrl(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
               >
                 <option value="">全部</option>
                 {uniqueRenewalUrls.map(url => (
@@ -191,13 +241,13 @@ export function Dashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 使用期限（年）
               </label>
               <select
                 value={filterUsagePeriod}
                 onChange={(e) => setFilterUsagePeriod(e.target.value ? parseInt(e.target.value) : '')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
               >
                 <option value="">全部</option>
                 {uniqueUsagePeriods.map(period => (
@@ -207,13 +257,13 @@ export function Dashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 提醒次数
               </label>
               <select
                 value={filterReminderCount}
                 onChange={(e) => setFilterReminderCount(e.target.value ? parseInt(e.target.value) : '')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
               >
                 <option value="">全部</option>
                 {uniqueReminderCounts.map(count => (
@@ -224,13 +274,16 @@ export function Dashboard() {
           </div>
 
           {(filterRenewalUrl || filterUsagePeriod || filterReminderCount) && (
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 bg-indigo-50/80 backdrop-blur-sm rounded-xl p-3 border border-indigo-100">
+              <div className="text-xs sm:text-sm text-indigo-700 font-medium flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 已应用 {[filterRenewalUrl, filterUsagePeriod, filterReminderCount].filter(Boolean).length} 个筛选条件
               </div>
               <button
                 onClick={clearFilters}
-                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-semibold hover:underline"
               >
                 清除筛选
               </button>
@@ -240,19 +293,19 @@ export function Dashboard() {
 
         {/* Domains List */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-            <p className="mt-4 text-gray-600">加载中...</p>
+          <div className="text-center py-12 sm:py-16">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+            <p className="mt-4 text-sm sm:text-base text-gray-600 font-medium">加载中...</p>
           </div>
         ) : domains.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="glass-card rounded-xl sm:rounded-2xl shadow-lg p-12 sm:p-16 text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">还没有域名</h3>
-            <p className="text-gray-600 mb-6">点击上方按钮添加您的第一个域名</p>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">还没有域名</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">点击上方按钮添加您的第一个域名，开始管理续期提醒</p>
           </div>
         ) : viewMode === 'list' ? (
           <DomainListView 
@@ -311,73 +364,105 @@ interface DomainListViewProps {
 
 function DomainListView({ domains, onEdit, onDelete, getDaysUntilExpiry, formatDate }: DomainListViewProps) {
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              域名
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              到期日期
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              剩余天数
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              提醒进度
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              操作
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {domains.map((domain) => {
-            const daysLeft = getDaysUntilExpiry(domain.expiryDate);
-            const isUrgent = daysLeft <= 7;
-            const isWarning = daysLeft <= 30;
+    <div className="glass-card rounded-xl sm:rounded-2xl shadow-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50/80 backdrop-blur-sm">
+            <tr>
+              <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                域名信息
+              </th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                到期日期
+              </th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                剩余天数
+              </th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                提醒进度
+              </th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                操作
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white/50 backdrop-blur-sm divide-y divide-gray-100">
+            {domains.map((domain) => {
+              const daysLeft = getDaysUntilExpiry(domain.expiryDate);
+              const isUrgent = daysLeft <= 7;
+              const isWarning = daysLeft <= 30;
 
-            return (
-              <tr key={domain.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{domain.domainAddress}</div>
-                  <div className="text-sm text-gray-500">{domain.renewalUrl}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(domain.expiryDate)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    isUrgent ? 'bg-red-100 text-red-800' :
-                    isWarning ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {daysLeft} 天
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {domain.remindersSent} / {domain.reminderCount}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button 
-                    onClick={() => onEdit(domain)}
-                    className="text-purple-600 hover:text-purple-900 mr-4"
-                  >
-                    编辑
-                  </button>
-                  <button 
-                    onClick={() => onDelete(domain)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    删除
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr key={domain.id} className="hover:bg-indigo-50/30 transition-all duration-200">
+                  <td className="px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{domain.domainAddress}</div>
+                        <div className="text-xs text-gray-500 mt-0.5 truncate">{domain.renewalUrl}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="text-xs sm:text-sm font-medium text-gray-900">{formatDate(domain.expiryDate)}</div>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3 sm:py-4">
+                    <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-bold rounded-full shadow-sm ${
+                      isUrgent ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
+                      isWarning ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' :
+                      'bg-gradient-to-r from-green-400 to-emerald-500 text-white'
+                    }`}>
+                      <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {daysLeft} 天
+                    </span>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[80px] sm:max-w-[100px]">
+                        <div 
+                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(domain.remindersSent / domain.reminderCount) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+                        {domain.remindersSent}/{domain.reminderCount}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <button 
+                        onClick={() => onEdit(domain)}
+                        className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200"
+                        title="编辑"
+                      >
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button 
+                        onClick={() => onDelete(domain)}
+                        className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        title="删除"
+                      >
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -396,62 +481,99 @@ interface DomainGroupedViewProps {
 
 function DomainGroupedView({ groupedDomains, onEdit, onDelete, getDaysUntilExpiry, formatDate }: DomainGroupedViewProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {Object.entries(groupedDomains).map(([renewalUrl, domains]) => (
-        <div key={renewalUrl} className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-4">
-            <h3 className="text-lg font-semibold text-white">{renewalUrl}</h3>
-            <p className="text-sm text-purple-100 mt-1">{domains.length} 个域名</p>
+        <div key={renewalUrl} className="glass-card rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500 px-4 sm:px-6 py-4 sm:py-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-white truncate">{renewalUrl}</h3>
+                  <p className="text-xs sm:text-sm text-indigo-100 mt-0.5 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                    {domains.length} 个域名
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-100">
             {domains.map((domain) => {
               const daysLeft = getDaysUntilExpiry(domain.expiryDate);
               const isUrgent = daysLeft <= 7;
               const isWarning = daysLeft <= 30;
 
               return (
-                <div key={domain.id} className="px-6 py-4 hover:bg-gray-50 transition">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-gray-900">{domain.domainAddress}</div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            到期: {formatDate(domain.expiryDate)}
-                          </div>
+                <div key={domain.id} className="px-6 py-5 hover:bg-purple-50/30 transition-all duration-200">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base font-bold text-gray-900 truncate">{domain.domainAddress}</div>
+                        <div className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          到期: {formatDate(domain.expiryDate)}
                         </div>
-                        
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                              isUrgent ? 'bg-red-100 text-red-800' :
-                              isWarning ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-green-100 text-green-800'
-                            }`}>
-                              剩余 {daysLeft} 天
-                            </span>
-                          </div>
-                          
-                          <div className="text-sm text-gray-600">
-                            提醒: {domain.remindersSent} / {domain.reminderCount}
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => onEdit(domain)}
-                              className="px-3 py-1 text-sm text-purple-600 hover:text-purple-900 font-medium"
-                            >
-                              编辑
-                            </button>
-                            <button 
-                              onClick={() => onDelete(domain)}
-                              className="px-3 py-1 text-sm text-red-600 hover:text-red-900 font-medium"
-                            >
-                              删除
-                            </button>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 flex-shrink-0">
+                      <div>
+                        <span className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-xl shadow-sm ${
+                          isUrgent ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
+                          isWarning ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' :
+                          'bg-gradient-to-r from-green-400 to-emerald-500 text-white'
+                        }`}>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          剩余 {daysLeft} 天
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2">
+                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span className="text-sm font-semibold text-gray-700">
+                          {domain.remindersSent}/{domain.reminderCount}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1">
+                        <button 
+                          onClick={() => onEdit(domain)}
+                          className="p-2.5 text-purple-600 hover:bg-purple-100 rounded-xl transition-all duration-200"
+                          title="编辑"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => onDelete(domain)}
+                          className="p-2.5 text-red-600 hover:bg-red-100 rounded-xl transition-all duration-200"
+                          title="删除"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -508,29 +630,39 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-gray-900">添加域名</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+      <div className="glass-card rounded-xl sm:rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-slideUp">
+        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center rounded-t-xl sm:rounded-t-2xl">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-white">添加域名</h3>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
+            className="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2 transition-all duration-200"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
+            <div className="bg-red-50/80 backdrop-blur-sm border-l-4 border-red-500 text-red-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg flex items-start gap-2 sm:gap-3 text-sm">
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               域名地址 *
             </label>
             <input
@@ -539,12 +671,12 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
               value={formData.domainAddress}
               onChange={(e) => setFormData({ ...formData, domainAddress: e.target.value })}
               placeholder="example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               续期网址 *
             </label>
             <input
@@ -553,13 +685,13 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
               value={formData.renewalUrl}
               onChange={(e) => setFormData({ ...formData, renewalUrl: e.target.value })}
               placeholder="https://example.com/renew"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 注册日期 *
               </label>
               <input
@@ -567,12 +699,12 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
                 required
                 value={formData.registrationDate}
                 onChange={(e) => setFormData({ ...formData, registrationDate: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 使用期限（年）*
               </label>
               <input
@@ -582,14 +714,14 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
                 max="10"
                 value={formData.usagePeriodYears}
                 onChange={(e) => setFormData({ ...formData, usagePeriodYears: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 提前提醒天数 *
               </label>
               <input
@@ -599,13 +731,13 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
                 max="365"
                 value={formData.reminderDaysOffset}
                 onChange={(e) => setFormData({ ...formData, reminderDaysOffset: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
               />
-              <p className="text-xs text-gray-500 mt-1">到期前多少天开始提醒</p>
+              <p className="text-xs text-gray-500 mt-1.5">到期前多少天开始提醒</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 提醒次数 *
               </label>
               <input
@@ -615,14 +747,14 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
                 max="30"
                 value={formData.reminderCount}
                 onChange={(e) => setFormData({ ...formData, reminderCount: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
               />
-              <p className="text-xs text-gray-500 mt-1">连续提醒几天</p>
+              <p className="text-xs text-gray-500 mt-1.5">连续提醒几天</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               提醒邮箱 *
             </label>
             <input
@@ -631,23 +763,23 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
               value={formData.reminderEmail}
               onChange={(e) => setFormData({ ...formData, reminderEmail: e.target.value })}
               placeholder="your@email.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all bg-white/50 backdrop-blur-sm"
             />
-            <p className="text-xs text-gray-500 mt-1">接收提醒的邮箱地址</p>
+            <p className="text-xs text-gray-500 mt-1.5">接收提醒的邮箱地址</p>
           </div>
 
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              className="flex-1 px-4 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold text-sm"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-600 transition disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl text-sm"
             >
               {loading ? '添加中...' : '添加域名'}
             </button>

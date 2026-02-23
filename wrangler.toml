@@ -1,7 +1,13 @@
 name = "domain-renewal-reminder"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
-node_compat = true
+compatibility_flags = ["nodejs_compat"]
+
+# External modules rules
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+fallthrough = true
 
 # Environment variables (set these in Cloudflare dashboard or via wrangler secret)
 # ADMIN_PASSWORD - Admin panel password
@@ -11,12 +17,12 @@ node_compat = true
 [[d1_databases]]
 binding = "DB"
 database_name = "domain_renewal_db"
-database_id = "placeholder" # Will be replaced after creating the database
+database_id = "b80fa24a-841f-49da-84a5-cffddb1c5c77"
 
 # KV namespace bindings
 [[kv_namespaces]]
 binding = "KV"
-id = "placeholder" # Will be replaced after creating the KV namespace
+id = "279e769eecde4179bd64738c088e4b7e"
 
 # Cron trigger for daily reminder checks (runs at 00:00 UTC daily)
 [triggers]

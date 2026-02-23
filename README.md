@@ -1,4 +1,4 @@
-# 域名续期提醒服务 / Domain Renewal Reminder Service
+# 爱自由域名管理 / Domain Renewal Reminder Service
 
 <div align="center">
 
@@ -19,7 +19,7 @@
 
 ### 📖 简介
 
-域名续期提醒服务是一个完全免费的 Web 应用，帮助用户管理免费域名的续期时间。通过自动化的邮件提醒机制，确保你不会错过任何域名的续期时间。
+爱自由域名管理是一个完全免费的 Web 应用，帮助用户管理域名的续期时间。通过自动化的邮件提醒机制，确保你不会错过任何域名的续期时间。
 
 **核心特性：**
 - ✅ 用户注册和邮箱验证
@@ -49,7 +49,7 @@
 - React Router
 
 **安全：**
-- bcrypt 密码哈希
+- PBKDF2 密码哈希（Web Crypto API）
 - AES-256-GCM 数据加密
 - 会话管理
 - 速率限制
@@ -167,7 +167,7 @@ domain-renewal-reminder/
 
 ### 🔐 安全特性
 
-- **密码安全**：bcrypt 哈希（10 轮）
+- **密码安全**：PBKDF2 哈希（100,000 轮迭代，Web Crypto API）
 - **数据加密**：AES-256-GCM 加密敏感数据
 - **会话管理**：安全的随机 token，7天自动过期
 - **速率限制**：防止暴力破解（10请求/分钟）
@@ -242,7 +242,7 @@ MIT License
 
 ### 📖 Introduction
 
-Domain Renewal Reminder Service is a completely free web application that helps users manage domain renewal times. Through automated email reminder mechanisms, ensure you never miss any domain renewal deadline.
+Domain Renewal Reminder Service (爱自由域名管理) is a completely free web application that helps users manage domain renewal times. Through automated email reminder mechanisms, ensure you never miss any domain renewal deadline.
 
 **Core Features:**
 - ✅ User registration and email verification
@@ -272,7 +272,7 @@ Domain Renewal Reminder Service is a completely free web application that helps 
 - React Router
 
 **Security:**
-- bcrypt password hashing
+- PBKDF2 password hashing (Web Crypto API)
 - AES-256-GCM data encryption
 - Session management
 - Rate limiting
@@ -321,6 +321,6 @@ If you encounter issues:
 
 Made with ❤️ using Cloudflare Workers
 
-[⬆ Back to Top](#域名续期提醒服务--domain-renewal-reminder-service)
+[⬆ Back to Top](#爱自由域名管理--domain-renewal-reminder-service)
 
 </div>

@@ -47,7 +47,7 @@ class ApiClient {
     };
 
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
     }
 
     try {
@@ -161,20 +161,55 @@ class ApiClient {
     });
   }
 
-  // Admin endpoints
+  // Admin endpoints (use admin password from sessionStorage)
+  private async adminRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    const adminPassword = sessionStorage.getItem('adminPassword');
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    if (adminPassword) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${adminPassword}`;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers,
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Admin API request error:', error);
+      return {
+        success: false,
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Failed to connect to server',
+        },
+      };
+    }
+  }
+
   async getUsers(page: number = 1, pageSize: number = 20) {
-    return this.request(`/admin/users?page=${page}&pageSize=${pageSize}`);
+    return this.adminRequest(`/admin/users?page=${page}&pageSize=${pageSize}`);
   }
 
   async blacklistUser(userId: string, reason: string) {
-    return this.request(`/admin/users/${userId}/blacklist`, {
+    return this.adminRequest(`/admin/users/${userId}/blacklist`, {
       method: 'POST',
       body: JSON.stringify({ reason }),
     });
   }
 
   async deleteUser(userId: string) {
-    return this.request(`/admin/users/${userId}`, {
+    return this.adminRequest(`/admin/users/${userId}`, {
       method: 'DELETE',
     });
   }
@@ -187,18 +222,18 @@ class ApiClient {
     fromEmail: string;
     fromName: string;
   }) {
-    return this.request('/admin/smtp', {
+    return this.adminRequest('/admin/smtp', {
       method: 'POST',
       body: JSON.stringify(config),
     });
   }
 
   async getSmtpConfig() {
-    return this.request('/admin/smtp');
+    return this.adminRequest('/admin/smtp');
   }
 
   async getAdminLogs(limit: number = 100) {
-    return this.request(`/admin/logs?limit=${limit}`);
+    return this.adminRequest(`/admin/logs?limit=${limit}`);
   }
 }
 

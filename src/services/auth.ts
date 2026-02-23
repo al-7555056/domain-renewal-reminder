@@ -3,12 +3,11 @@
  * Handles user registration, login, and session management
  */
 
-import bcrypt from 'bcrypt';
 import { User, Session, VerificationToken, ApiResponse } from '../types';
 import { isEmailDomainAllowed } from '../utils/email';
 import { isValidPassword } from '../utils/validation';
+import { hashPassword, verifyPassword } from '../utils/password';
 
-const SALT_ROUNDS = 10;
 const SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds
 const VERIFICATION_TTL = 24 * 60 * 60; // 24 hours in seconds
 
@@ -64,7 +63,7 @@ export class AuthService {
       }
 
       // Hash password
-      const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+      const passwordHash = await hashPassword(password);
 
       // Create user
       const userId = crypto.randomUUID();
@@ -197,7 +196,7 @@ export class AuthService {
       }
 
       // Verify password
-      const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+      const passwordMatch = await verifyPassword(password, user.passwordHash);
 
       if (!passwordMatch) {
         return {

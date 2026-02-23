@@ -1,6 +1,6 @@
 # 快速部署指南（5分钟）
 
-这是一个精简版的部署指南，适合有经验的开发者快速部署。
+这是一个精简版的部署指南，适合有经验的开发者快速部署爱自由域名管理服务。
 
 ---
 
@@ -58,18 +58,21 @@ npm run deploy
 ## 2. 前端部署（2分钟）
 
 ```bash
-# 1. 配置 API URL
+# 1. 构建前端
 cd frontend
-echo "VITE_API_URL=https://你的worker.workers.dev/api" > .env.production
-
-# 2. 构建
 npm run build
 
-# 3. 部署
-wrangler pages deploy dist --project-name=domain-renewal-reminder-frontend
+# 2. 部署到 Cloudflare Pages
+wrangler pages deploy dist --project-name=domain-renewal-reminder
+
+# 3. 在 Cloudflare Pages Dashboard 中配置环境变量
+# Settings > Environment variables > Production
+# 添加: VITE_API_URL = https://your-worker-url.workers.dev/api
 ```
 
 **记录你的 Pages URL！**
+
+**重要**: 前端 API URL 应该在 Cloudflare Pages Dashboard 的环境变量中配置，而不是在代码中硬编码。
 
 ---
 
@@ -145,9 +148,10 @@ curl https://你的worker.workers.dev/api/health
 - 管理员：`https://你的项目.pages.dev/admin`
 
 **下一步：**
-1. 在管理员面板配置 SMTP
-2. 添加你的第一个域名
-3. 等待提醒邮件
+1. 在 Cloudflare Pages Dashboard 配置环境变量 `VITE_API_URL`
+2. 在管理员面板配置 SMTP
+3. 添加你的第一个域名
+4. 等待提醒邮件
 
 ---
 

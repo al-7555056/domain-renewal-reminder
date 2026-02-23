@@ -114,26 +114,27 @@
 
 ## 🎨 前端部署
 
-- [ ] 前端生产环境变量已配置
-  ```bash
-  cd frontend
-  echo "VITE_API_URL=https://your-worker-url/api" > .env.production
-  ```
 - [ ] 前端已构建
   ```bash
+  cd frontend
   npm run build
   ```
 - [ ] 构建产物已验证（`frontend/dist` 目录存在）
 - [ ] 前端已部署到 Cloudflare Pages
   ```bash
-  wrangler pages deploy dist --project-name=domain-renewal-reminder-frontend
+  wrangler pages deploy dist --project-name=domain-renewal-reminder
   ```
   或通过 Git 连接自动部署
 - [ ] Pages URL 已记录
   ```
-  https://domain-renewal-reminder-frontend.pages.dev
+  https://your-project-name.pages.dev
   ```
+- [ ] Cloudflare Pages 环境变量已配置
+  - 在 Dashboard: Settings > Environment variables > Production
+  - 变量名: `VITE_API_URL`
+  - 值: `https://your-worker-url.workers.dev/api`
 - [ ] 前端可以访问
+- [ ] 前端可以正常连接后端 API
 
 ---
 

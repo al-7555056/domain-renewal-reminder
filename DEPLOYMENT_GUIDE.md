@@ -1,6 +1,6 @@
-# 域名续期提醒服务 - 完整部署指南
+# 爱自由域名管理 - 完整部署指南
 
-本指南将帮助你从零开始部署域名续期提醒服务到 Cloudflare。
+本指南将帮助你从零开始部署爱自由域名管理服务到 Cloudflare。
 
 ---
 
@@ -279,16 +279,35 @@ curl -X POST https://domain-renewal-reminder.your-subdomain.workers.dev/api/auth
 
 ## 前端部署（Cloudflare Pages）
 
-### 步骤 1: 配置前端环境变量
+### 步骤 3: 配置前端环境变量
+
+前端使用环境变量来配置后端 API 地址。有两种方式配置：
+
+#### 方式 A: 使用 Cloudflare Pages 环境变量（推荐）
+
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
+2. 进入 **Pages** > 你的项目
+3. 点击 **Settings** > **Environment variables**
+4. 添加变量：
+   - **Variable name**: `VITE_API_URL`
+   - **Value**: `https://your-worker-url.workers.dev/api` (替换为你的 Worker URL)
+   - **Environment**: Production
+5. 点击 **Save**
+
+这种方式的优点是不需要在代码中硬编码 API 地址，可以随时在 Dashboard 中修改。
+
+#### 方式 B: 使用 .env.production 文件
 
 创建 `frontend/.env.production` 文件：
 
 ```bash
 cd frontend
 cat > .env.production << EOF
-VITE_API_URL=https://domain-renewal-reminder.your-subdomain.workers.dev/api
+VITE_API_URL=https://your-worker-url.workers.dev/api
 EOF
 ```
+
+**注意**: 使用这种方式时，不要将 `.env.production` 提交到 Git。已在 `.gitignore` 中排除。
 
 **重要：** 将 URL 替换为你的实际 Worker URL（从上一步获得）。
 
@@ -329,15 +348,21 @@ wrangler pages deploy frontend/dist --project-name=domain-renewal-reminder-front
    - **Build command:** `cd frontend && npm install && npm run build`
    - **Build output directory:** `frontend/dist`
    - **Root directory:** `/`
-5. 添加环境变量：
-   - `VITE_API_URL`: 你的 Worker URL
+5. 添加环境变量（Production）：
+   - **Variable name**: `VITE_API_URL`
+   - **Value**: `https://your-worker-url.workers.dev/api` (你的 Worker URL)
 6. 点击 **Save and Deploy**
+
+这种方式的优点：
+- 每次推送代码自动部署
+- 环境变量在 Dashboard 中管理，不会泄露
+- 支持预览部署（Preview Deployments）
 
 ### 步骤 4: 获取前端 URL
 
 部署完成后，你会得到一个 URL，类似：
 ```
-https://domain-renewal-reminder-frontend.pages.dev
+https://your-project-name.pages.dev
 ```
 
 ### 步骤 5: 配置 CORS（如果需要）
@@ -357,7 +382,7 @@ app.use('*', cors());
 
 ```typescript
 app.use('*', cors({
-  origin: ['https://domain-renewal-reminder-frontend.pages.dev'],
+  origin: ['https://your-frontend-url.pages.dev'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -711,11 +736,15 @@ wrangler secret list
 **可能原因：**
 - CORS 配置问题
 - API URL 配置错误
+- 环境变量未正确设置
 
 **解决方法：**
-1. 检查 `frontend/.env.production` 中的 `VITE_API_URL`
+1. 检查 Cloudflare Pages 环境变量中的 `VITE_API_URL`
 2. 确保后端启用了 CORS
 3. 检查浏览器控制台的错误信息
+4. 验证 Worker URL 是否正确
+
+**注意**: 前端的 `.env` 文件仅用于本地开发，生产环境应使用 Cloudflare Pages 环境变量。
 
 ### Q3: 邮件发送失败
 

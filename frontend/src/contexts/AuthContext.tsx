@@ -2,7 +2,7 @@
  * Authentication Context
  */
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { apiClient } from '../api/client';
 
 interface User {
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await apiClient.getCurrentUser();
       if (response.success && response.data) {
-        setUser(response.data);
+        setUser(response.data as User);
       } else {
         setUser(null);
         apiClient.setToken(null);
