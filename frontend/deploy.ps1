@@ -3,8 +3,8 @@
 
 Write-Host "开始构建前端..." -ForegroundColor Green
 
-# 设置环境变量
-$env:VITE_API_URL = "https://new.zhiye.de5.net/api"
+# 设置环境变量（替换为你的实际 API URL）
+$env:VITE_API_URL = "https://your-worker-url.workers.dev/api"
 
 # 构建
 npm run build
