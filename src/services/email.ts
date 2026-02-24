@@ -11,15 +11,10 @@ export class EmailService {
 
   /**
    * Send email via SMTP
-   * Note: In Cloudflare Workers, we need to use fetch to send emails
-   * This is a simplified implementation - in production, you'd use a service like Mailgun, SendGrid, etc.
+   * Uses HTTP API since Cloudflare Workers doesn't support direct SMTP connections
    */
-  async sendEmail(to: string, subject: string, _htmlBody: string): Promise<ApiResponse> {
+  async sendEmail(to: string, subject: string, htmlBody: string): Promise<ApiResponse> {
     try {
-      // For Cloudflare Workers, we'll use fetch to send via SMTP API
-      // This is a placeholder - you'll need to implement actual SMTP sending
-      // using a service like Mailgun, SendGrid, or AWS SES
-
       console.log('Sending email:', { to, subject });
       console.log('SMTP Config:', {
         host: this.smtpConfig.host,
@@ -27,17 +22,45 @@ export class EmailService {
         from: this.smtpConfig.fromEmail,
       });
 
-      // TODO: Implement actual email sending
-      // For now, just log and return success
+      // 构建邮件内容
+      const emailData = {
+        from: {
+          email: this.smtpConfig.fromEmail,
+          name: this.smtpConfig.fromName,
+        },
+        to: [{ email: to }],
+        subject: subject,
+        html: htmlBody,
+      };
+
+      // 尝试使用通用的 SMTP HTTP API
+      // 注意：这需要你的 SMTP 服务支持 HTTP API
+      // 如果你的服务不支持，需要使用第三方邮件服务（如 Resend、SendGrid、Mailgun）
       
+      const authHeader = this.smtpConfig.username 
+        ? `Basic ${btoa(`${this.smtpConfig.username}:${this.smtpConfig.password}`)}`
+        : `Bearer ${this.smtpConfig.password}`;
+
+      const response = await fetch(`https://${this.smtpConfig.host}/api/send`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`SMTP API error: ${response.status} - ${errorText}`);
+      }
+
       return {
         success: true,
         message: 'Email sent successfully',
       };
     } catch (error) {
       console.error('Email sending error:', error);
-      
-      // Log error for monitoring
       await this.logEmailError(to, subject, error);
 
       return {

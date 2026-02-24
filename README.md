@@ -64,6 +64,7 @@
 
 - [完整部署指南](DEPLOYMENT_GUIDE.md) - 后端 + 前端完整步骤
 - [Git 集成部署](GIT_DEPLOYMENT_GUIDE.md) - 前端自动部署（推荐）
+- [邮件服务配置](EMAIL_SETUP.md) - 邮件发送配置指南
 
 ### 🛠️ 本地开发
 
