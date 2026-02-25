@@ -9,13 +9,13 @@ import { apiClient } from '../api/client';
 
 interface Domain {
   id: string;
-  domainAddress: string;
-  renewalUrl: string;
-  expiryDate: number;
-  reminderStartDate: number;
-  remindersSent: number;
-  reminderCount: number;
-  usagePeriodYears: number;
+  domain_address: string;
+  renewal_url: string;
+  expiry_date: number;
+  reminder_start_date: number;
+  reminders_sent: number;
+  reminder_count: number;
+  usage_period_years: number;
 }
 
 export function Dashboard() {
@@ -96,24 +96,24 @@ export function Dashboard() {
   const filteredDomains = domains.filter(domain => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    return domain.domainAddress.toLowerCase().includes(query) ||
-           domain.renewalUrl.toLowerCase().includes(query);
+    return domain.domain_address.toLowerCase().includes(query) ||
+           domain.renewal_url.toLowerCase().includes(query);
   });
 
   const groupDomainsByRenewalUrl = () => {
     const grouped: Record<string, Domain[]> = {};
     filteredDomains.forEach(domain => {
-      if (!grouped[domain.renewalUrl]) {
-        grouped[domain.renewalUrl] = [];
+      if (!grouped[domain.renewal_url]) {
+        grouped[domain.renewal_url] = [];
       }
-      grouped[domain.renewalUrl].push(domain);
+      grouped[domain.renewal_url].push(domain);
     });
     return grouped;
   };
 
-  const uniqueRenewalUrls = Array.from(new Set(domains.map(d => d.renewalUrl)));
-  const uniqueUsagePeriods = Array.from(new Set(domains.map(d => d.usagePeriodYears))).sort((a, b) => a - b);
-  const uniqueReminderCounts = Array.from(new Set(domains.map(d => d.reminderCount))).sort((a, b) => a - b);
+  const uniqueRenewalUrls = Array.from(new Set(domains.map(d => d.renewal_url)));
+  const uniqueUsagePeriods = Array.from(new Set(domains.map(d => d.usage_period_years))).sort((a, b) => a - b);
+  const uniqueReminderCounts = Array.from(new Set(domains.map(d => d.reminder_count))).sort((a, b) => a - b);
 
   return (
     <div className="min-h-screen w-full ink-wash-bg relative">
@@ -174,7 +174,7 @@ export function Dashboard() {
             </div>
             <div className="text-xs sm:text-sm font-semibold text-gray-600 mb-1">即将到期</div>
             <div className="text-3xl sm:text-4xl font-bold text-gray-800">
-              {domains.filter(d => getDaysUntilExpiry(d.expiryDate) <= 30).length}
+              {domains.filter(d => getDaysUntilExpiry(d.expiry_date) <= 30).length}
             </div>
           </div>
           
@@ -188,7 +188,7 @@ export function Dashboard() {
             </div>
             <div className="text-xs sm:text-sm font-semibold text-gray-600 mb-1">已发送提醒</div>
             <div className="text-3xl sm:text-4xl font-bold text-gray-800">
-              {domains.reduce((sum, d) => sum + d.remindersSent, 0)}
+              {domains.reduce((sum, d) => sum + d.reminders_sent, 0)}
             </div>
           </div>
         </div>
@@ -550,7 +550,7 @@ function DomainListView({ domains, onEdit, onDelete, getDaysUntilExpiry, formatD
           </thead>
           <tbody className="bg-white/50 backdrop-blur-sm divide-y divide-gray-100">
             {domains.map((domain) => {
-              const daysLeft = getDaysUntilExpiry(domain.expiryDate);
+              const daysLeft = getDaysUntilExpiry(domain.expiry_date);
               const isUrgent = daysLeft <= 7;
               const isWarning = daysLeft <= 30;
 
@@ -564,13 +564,13 @@ function DomainListView({ domains, onEdit, onDelete, getDaysUntilExpiry, formatD
                         </svg>
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{domain.domainAddress}</div>
-                        <div className="text-xs text-gray-500 mt-0.5 truncate">{domain.renewalUrl}</div>
+                        <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{domain.domain_address}</div>
+                        <div className="text-xs text-gray-500 mt-0.5 truncate">{domain.renewal_url}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 sm:px-6 py-3 sm:py-4">
-                    <div className="text-xs sm:text-sm font-medium text-gray-900">{formatDate(domain.expiryDate)}</div>
+                    <div className="text-xs sm:text-sm font-medium text-gray-900">{formatDate(domain.expiry_date)}</div>
                   </td>
                   <td className="px-4 sm:px-6 py-3 sm:py-4">
                     <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-bold rounded-full shadow-sm ${
@@ -589,11 +589,11 @@ function DomainListView({ domains, onEdit, onDelete, getDaysUntilExpiry, formatD
                       <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[80px] sm:max-w-[100px]">
                         <div 
                           className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(domain.remindersSent / domain.reminderCount) * 100}%` }}
+                          style={{ width: `${(domain.reminders_sent / domain.reminder_count) * 100}%` }}
                         ></div>
                       </div>
                       <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
-                        {domain.remindersSent}/{domain.reminderCount}
+                        {domain.reminders_sent}/{domain.reminder_count}
                       </span>
                     </div>
                   </td>
@@ -669,7 +669,7 @@ function DomainGroupedView({ groupedDomains, onEdit, onDelete, getDaysUntilExpir
           
           <div className="divide-y divide-gray-100">
             {domains.map((domain) => {
-              const daysLeft = getDaysUntilExpiry(domain.expiryDate);
+              const daysLeft = getDaysUntilExpiry(domain.expiry_date);
               const isUrgent = daysLeft <= 7;
               const isWarning = daysLeft <= 30;
 
@@ -684,12 +684,12 @@ function DomainGroupedView({ groupedDomains, onEdit, onDelete, getDaysUntilExpir
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="text-base font-bold text-gray-900 truncate">{domain.domainAddress}</div>
+                        <div className="text-base font-bold text-gray-900 truncate">{domain.domain_address}</div>
                         <div className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          到期: {formatDate(domain.expiryDate)}
+                          到期: {formatDate(domain.expiry_date)}
                         </div>
                       </div>
                     </div>
@@ -713,7 +713,7 @@ function DomainGroupedView({ groupedDomains, onEdit, onDelete, getDaysUntilExpir
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                         <span className="text-sm font-semibold text-gray-700">
-                          {domain.remindersSent}/{domain.reminderCount}
+                          {domain.reminders_sent}/{domain.reminder_count}
                         </span>
                       </div>
                       
@@ -1242,9 +1242,9 @@ interface EditDomainModalProps {
 
 function EditDomainModal({ domain, onClose, onSuccess }: EditDomainModalProps) {
   const [formData, setFormData] = useState({
-    renewalUrl: domain.renewalUrl,
-    reminderStartDate: new Date(domain.reminderStartDate * 1000).toISOString().split('T')[0],
-    reminderCount: domain.reminderCount,
+    renewalUrl: domain.renewal_url,
+    reminderStartDate: new Date(domain.reminder_start_date * 1000).toISOString().split('T')[0],
+    reminderCount: domain.reminder_count,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -1319,7 +1319,7 @@ function EditDomainModal({ domain, onClose, onSuccess }: EditDomainModalProps) {
               <input
                 type="text"
                 disabled
-                value={domain.domainAddress}
+                value={domain.domain_address}
                 className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm border-2 border-gray-200 rounded-xl bg-gray-50/80 text-gray-500 cursor-not-allowed backdrop-blur-sm"
               />
             </div>
@@ -1471,7 +1471,7 @@ function DeleteConfirmDialog({ domain, onClose, onSuccess }: DeleteConfirmDialog
             确认删除域名
           </h3>
           <p className="text-sm sm:text-base text-gray-600 text-center mb-6">
-            您确定要删除域名 <span className="font-bold text-gray-900">{domain.domainAddress}</span> 吗？
+            您确定要删除域名 <span className="font-bold text-gray-900">{domain.domain_address}</span> 吗？
           </p>
           <div className="bg-red-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-lg p-3 sm:p-4 mb-6">
             <div className="flex items-start gap-2 sm:gap-3">
