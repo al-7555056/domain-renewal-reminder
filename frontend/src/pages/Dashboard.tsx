@@ -297,63 +297,7 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Filter grid matching table columns - Hidden on mobile */}
-          <div className="hidden md:flex gap-4 mb-4">
-            <div style={{ width: '35%' }}>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                续期网址
-              </label>
-              <select
-                value={filterRenewalUrl}
-                onChange={(e) => setFilterRenewalUrl(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
-              >
-                <option value="">全部</option>
-                {uniqueRenewalUrls.map(url => (
-                  <option key={url} value={url}>{url}</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ width: '15%' }}>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                使用期限（年）
-              </label>
-              <select
-                value={filterUsagePeriod}
-                onChange={(e) => setFilterUsagePeriod(e.target.value ? parseInt(e.target.value) : '')}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
-              >
-                <option value="">全部</option>
-                {uniqueUsagePeriods.map(period => (
-                  <option key={period} value={period}>{period} 年</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ width: '15%' }}>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                提醒次数
-              </label>
-              <select
-                value={filterReminderCount}
-                onChange={(e) => setFilterReminderCount(e.target.value ? parseInt(e.target.value) : '')}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
-              >
-                <option value="">全部</option>
-                {uniqueReminderCounts.map(count => (
-                  <option key={count} value={count}>{count} 次</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Empty spacers for remaining columns */}
-            <div style={{ width: '20%' }}></div>
-            <div style={{ width: '15%' }}></div>
-          </div>
-
-          {/* Mobile filter grid */}
-          <div className="md:hidden grid grid-cols-1 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 续期网址
