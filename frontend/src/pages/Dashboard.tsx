@@ -579,6 +579,9 @@ function DomainListView({ domains, onEdit, onDelete, getDaysUntilExpiry, formatD
                     <td className="px-6 py-4 align-middle">
                       <div className="text-sm font-semibold text-gray-900 truncate">{domain.domain_address}</div>
                       <div className="text-xs text-gray-500 mt-0.5 truncate">{domain.renewal_url}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        提醒开始：{formatDate(domain.reminder_start_date)}
+                      </div>
                     </td>
                     <td className="px-6 py-4 align-middle">
                       <div className="text-sm font-medium text-gray-900">{formatDate(domain.expiry_date)}</div>
@@ -674,6 +677,10 @@ function DomainListView({ domains, onEdit, onDelete, getDaysUntilExpiry, formatD
                     </svg>
                     {daysLeft} 天
                   </span>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">提醒开始</div>
+                  <div className="text-sm font-medium text-gray-900">{formatDate(domain.reminder_start_date)}</div>
                 </div>
               </div>
 
@@ -776,13 +783,19 @@ function DomainGroupedView({ groupedDomains, onEdit, onDelete, getDaysUntilExpir
                       
                       <div className="flex-1 min-w-0">
                         <div className="text-base font-bold text-gray-900 break-all">{domain.domain_address}</div>
-                        <div className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 break-all">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          到期: {formatDate(domain.expiry_date)}
-                        </div>
+                      <div className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 break-all">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        到期: {formatDate(domain.expiry_date)}
                       </div>
+                      <div className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 break-all">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        提醒开始: {formatDate(domain.reminder_start_date)}
+                      </div>
+                    </div>
                     </div>
                     
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end lg:flex-nowrap">

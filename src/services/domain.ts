@@ -10,6 +10,11 @@ import { calculateExpiryDate, calculateReminderDate, dateToTimestamp } from '../
 export class DomainService {
   constructor(private db: D1Database) {}
 
+  private calculateReminderDaysOffset(expiryDate: Date, reminderStartDate: Date): number {
+    const diff = expiryDate.getTime() - reminderStartDate.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
   /**
    * Batch add multiple domains
    */
@@ -172,7 +177,7 @@ export class DomainService {
   async updateDomain(
     userId: string,
     domainId: string,
-    updates: Partial<DomainInput>
+    updates: Partial<DomainInput> & { reminderStartDate?: number | Date }
   ): Promise<ApiResponse> {
     try {
       // Get existing domain
@@ -217,9 +222,30 @@ export class DomainService {
         };
       }
 
-      // Recalculate dates
+      // Recalculate expiry date first. Reminder date can either be derived from offset
+      // or explicitly overridden by the edit form.
       const expiryDate = calculateExpiryDate(merged.registrationDate, merged.usagePeriodYears);
-      const reminderStartDate = calculateReminderDate(expiryDate, merged.reminderDaysOffset);
+      const manualReminderStartDate =
+        updates.reminderStartDate !== undefined
+          ? updates.reminderStartDate instanceof Date
+            ? updates.reminderStartDate
+            : new Date(updates.reminderStartDate * 1000)
+          : null;
+
+      const reminderStartDate = manualReminderStartDate || calculateReminderDate(expiryDate, merged.reminderDaysOffset);
+      const reminderDaysOffset = manualReminderStartDate
+        ? this.calculateReminderDaysOffset(expiryDate, reminderStartDate)
+        : merged.reminderDaysOffset;
+
+      if (reminderDaysOffset < 1 || reminderDaysOffset > 365) {
+        return {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Reminder start date must be between 1 and 365 days before expiry',
+          },
+        };
+      }
 
       const now = Math.floor(Date.now() / 1000);
 
@@ -238,7 +264,7 @@ export class DomainService {
           dateToTimestamp(merged.registrationDate),
           merged.usagePeriodYears,
           dateToTimestamp(expiryDate),
-          merged.reminderDaysOffset,
+          reminderDaysOffset,
           dateToTimestamp(reminderStartDate),
           merged.reminderEmail,
           merged.reminderCount,
