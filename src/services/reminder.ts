@@ -105,10 +105,10 @@ export class ReminderService {
   private async sendReminder(domain: Domain, emailService: EmailService): Promise<ApiResponse> {
     try {
       // Compose email
-      const { subject, body } = emailService.composeReminderEmail(domain);
+      const { subject, htmlBody, textBody } = emailService.composeReminderEmail(domain);
 
       // Send email
-      const sendResult = await emailService.sendEmail(domain.reminder_email, subject, body);
+      const sendResult = await emailService.sendEmail(domain.reminder_email, subject, htmlBody, textBody);
 
       if (!sendResult.success) {
         console.error(`Failed to send reminder for domain ${domain.id}:`, sendResult.error);

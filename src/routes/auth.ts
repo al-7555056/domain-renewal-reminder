@@ -67,7 +67,7 @@ auth.post('/register', async (c) => {
         const token = result.data.verificationToken as string;
         const appUrl = getVerificationAppUrl(c);
         
-        const { subject, body } = emailService.composeVerificationEmail(email, token, appUrl);
+        const { subject, htmlBody, textBody } = emailService.composeVerificationEmail(email, token, appUrl);
         
         console.log('Sending verification email:', {
           to: email,
@@ -78,7 +78,7 @@ auth.post('/register', async (c) => {
           appUrl,
         });
         
-        const emailResult = await emailService.sendEmail(email, subject, body);
+        const emailResult = await emailService.sendEmail(email, subject, htmlBody, textBody);
         
         if (!emailResult.success) {
           console.error('Failed to send verification email:', emailResult.error);
@@ -315,7 +315,7 @@ auth.post('/resend-verification', async (c) => {
         const token = result.data.verificationToken as string;
         const appUrl = getVerificationAppUrl(c);
         
-        const { subject, body } = emailService.composeVerificationEmail(email, token, appUrl);
+        const { subject, htmlBody, textBody } = emailService.composeVerificationEmail(email, token, appUrl);
         
         console.log('Resending verification email:', {
           to: email,
@@ -324,7 +324,7 @@ auth.post('/resend-verification', async (c) => {
           appUrl,
         });
         
-        const emailResult = await emailService.sendEmail(email, subject, body);
+        const emailResult = await emailService.sendEmail(email, subject, htmlBody, textBody);
         
         if (!emailResult.success) {
           console.error('Failed to resend verification email:', emailResult.error);
