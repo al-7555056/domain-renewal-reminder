@@ -481,7 +481,7 @@ export class EmailService {
         this.assertSmtpResponse(response, ['354'], 'DATA command');
 
         const boundary = `boundary_${crypto.randomUUID()}`;
-        const emailContent = [
+        const messageBody = [
           `From: ${this.smtpConfig.fromName} <${this.smtpConfig.fromEmail}>`,
           `To: ${to}`,
           `Subject: ${subject}`,
@@ -501,10 +501,10 @@ export class EmailService {
           htmlBody,
           '',
           `--${boundary}--`,
-          '.',
         ].join('\r\n');
 
-        await sendCommand(this.dotStuff(emailContent));
+        // Dot-stuff only the message body. The SMTP terminator must remain a single "." line.
+        await sendCommand(`${this.dotStuff(messageBody)}\r\n.`);
         response = await readResponse();
         this.assertSmtpResponse(response, ['250'], 'Email sending');
 
