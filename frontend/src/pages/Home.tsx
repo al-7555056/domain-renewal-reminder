@@ -1,121 +1,121 @@
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/logo';
 
-const previewRows = [
-  '到期时间',
-  '提醒状态',
-  '处理记录',
-  '续费周期',
+const coreCapabilities = [
+  {
+    title: '统一台账',
+    description: '集中维护域名地址、续费链接、使用周期、提醒次数与责任信息。',
+  },
+  {
+    title: '自动提醒',
+    description: '系统按计划计算到期时间并执行每日检查，降低遗漏和延迟处理风险。',
+  },
+  {
+    title: '续费闭环',
+    description: '完成续费后自动顺延周期、重置提醒进度，并保留处理记录。',
+  },
+];
+
+const operatingHighlights = [
+  ['认证与权限', '支持注册、登录、邮箱验证与管理员入口。'],
+  ['部署架构', '基于 Cloudflare Workers、D1、KV 与 Pages 运行。'],
+  ['通知方式', '支持 HTTP API 与 SMTP 两类邮件发送配置。'],
+];
+
+const processSteps = [
+  '录入域名、注册日期、使用周期与提醒参数。',
+  '系统自动计算到期日期、提醒起始时间与发送进度。',
+  '续费完成后更新状态，并进入新的提醒周期。',
 ];
 
 export function Home() {
   return (
-    <div className="app-shell ink-wash-bg landing-shell">
+    <div className="app-shell ink-wash-bg landing-shell landing-shell--executive">
       <div className="ink-pattern" />
       <div className="landing-orb landing-orb--one" />
       <div className="landing-orb landing-orb--two" />
-      <div className="landing-orb landing-orb--three" />
 
-      <header className="app-topbar landing-topbar">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <BrandLogo title="爱自由域名管理" subtitle="Domain Renewal Reminder Service" />
-          <nav className="landing-nav" aria-label="Homepage actions">
-            <a
-              href="https://github.com/zhikanyeye/domain-renewal-reminder"
-              target="_blank"
-              rel="noreferrer"
-              className="landing-icon-link"
-              aria-label="GitHub repository"
-              title="GitHub repository"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2C6.477 2 2 6.59 2 12.25c0 4.528 2.865 8.37 6.839 9.727.5.096.682-.223.682-.495 0-.244-.009-.89-.014-1.747-2.782.62-3.369-1.39-3.369-1.39-.455-1.192-1.11-1.51-1.11-1.51-.908-.638.069-.625.069-.625 1.004.073 1.532 1.058 1.532 1.058.892 1.566 2.341 1.114 2.91.852.091-.667.349-1.115.635-1.371-2.22-.26-4.555-1.14-4.555-5.074 0-1.121.39-2.038 1.03-2.757-.104-.261-.447-1.312.097-2.735 0 0 .84-.276 2.75 1.053A9.303 9.303 0 0 1 12 6.838c.85.004 1.706.118 2.504.347 1.909-1.329 2.748-1.053 2.748-1.053.545 1.423.202 2.474.099 2.735.64.719 1.028 1.636 1.028 2.757 0 3.944-2.339 4.811-4.566 5.066.359.319.679.948.679 1.912 0 1.381-.012 2.494-.012 2.833 0 .274.18.596.688.494C19.138 20.616 22 16.776 22 12.25 22 6.59 17.523 2 12 2Z" />
-              </svg>
-            </a>
-            <Link to="/login" className="secondary-button">
-              登录
-            </Link>
-            <Link to="/register" className="primary-button">
-              开始使用
+      <header className="app-topbar landing-topbar landing-topbar--minimal">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <BrandLogo title="爱自有域名管理" subtitle="Domain Renewal Reminder Service" />
+          <nav className="landing-nav landing-nav--minimal" aria-label="Homepage actions">
+            <Link to="/login" className="primary-button landing-entry-button">
+              进入控制台
             </Link>
           </nav>
         </div>
       </header>
 
-      <main className="app-main landing-main">
-        <section className="landing-hero">
-          <div className="liquid-panel liquid-panel--hero animate-slideUp">
-            <div className="liquid-chip">Domain Renewal Console</div>
-
-            <div className="landing-copy">
-              <p className="landing-kicker">域名续费提醒与状态管理</p>
-              <h1 className="landing-title">
-                让域名续费，
-                <span className="text-gradient"> 始终在掌控中。</span>
-              </h1>
-              <p className="landing-description">
-                集中查看到期时间、提醒进度和处理状态。界面简洁，信息直接，适合长期使用。
-              </p>
-            </div>
-
-            <div className="landing-actions">
-              <Link to="/register" className="primary-button">
-                免费注册
-              </Link>
-              <Link to="/login" className="secondary-button">
-                进入控制台
-              </Link>
-            </div>
-          </div>
-
-          <div className="liquid-panel liquid-panel--aside animate-slideUp">
-            <div className="liquid-preview">
-              <div className="liquid-preview__header">
-                <div>
-                  <div className="liquid-preview__eyebrow">Overview</div>
-                  <h2>把需要处理的域名放在眼前</h2>
-                </div>
-                <div className="liquid-status-pill">
-                  <span className="liquid-status-pill__dot" />
-                  Clean
-                </div>
-              </div>
-
-              <div className="liquid-stack">
-                {previewRows.map((item) => (
-                  <div key={item} className="liquid-stack-card">
-                    <div className="liquid-stack-card__title">{item}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-section">
-          <article className="liquid-panel liquid-panel--feature">
-            <div className="liquid-chip liquid-chip--soft">Product highlights</div>
-            <h2 className="landing-feature__title">一个面板，处理域名到期、提醒和续费状态。</h2>
-            <p className="landing-feature__text">
-              到期时间、提醒进度、处理记录和续费周期集中呈现。信息足够直接，流程足够清楚，
-              适合个人长期使用，也适合小团队协作管理。
+      <main className="app-main landing-main landing-main--single">
+        <section className="home-brief animate-slideUp">
+          <div className="home-brief__hero">
+            <p className="home-brief__eyebrow">域名续费与提醒管理平台</p>
+            <h1 className="home-brief__title">统一管理域名到期周期、提醒策略与续费处理记录</h1>
+            <p className="home-brief__description">
+              本系统围绕域名续费场景提供用户认证、域名管理、邮件提醒、续费闭环与后台配置能力，
+              适用于个人长期维护，也适用于小规模团队协作管理。
             </p>
-          </article>
+            <div className="home-brief__annotation">
+              <span>面向正式使用场景设计</span>
+              <span>支持批量导入、状态管理与处理审计</span>
+            </div>
+            <p className="home-brief__subaction">
+              首次使用请先
+              <Link to="/register" className="inline-link">
+                注册账户
+              </Link>
+              。
+            </p>
+          </div>
+
+          <aside className="home-brief__summary" aria-label="Product summary">
+            <div className="home-summary-block">
+              <div className="home-summary-block__label">产品定位</div>
+              <p>用于统一维护域名续费时间、提醒计划与处理状态的轻量化管理服务。</p>
+            </div>
+            <div className="home-summary-block">
+              <div className="home-summary-block__label">核心范围</div>
+              <p>用户认证、域名管理、批量导入、提醒调度、邮件通知与管理员配置。</p>
+            </div>
+            <div className="home-summary-block">
+              <div className="home-summary-block__label">运行方式</div>
+              <p>基于 Cloudflare 免费资源部署，适合个人与小团队长期稳定使用。</p>
+            </div>
+          </aside>
         </section>
 
-        <section className="landing-section">
-          <div className="liquid-panel liquid-panel--cta">
-            <div>
-              <div className="liquid-chip liquid-chip--soft">Ready</div>
-              <h2 className="landing-cta__title">轻量管理，从容续费。</h2>
-              <p className="landing-cta__text">适合个人，也适合小团队长期使用。</p>
+        <section className="home-sheet animate-slideUp" aria-label="Homepage details">
+          <div className="home-sheet__column">
+            <div className="home-sheet__heading">核心能力</div>
+            <div className="home-feature-list">
+              {coreCapabilities.map((item) => (
+                <article key={item.title} className="home-feature-item">
+                  <h2>{item.title}</h2>
+                  <p>{item.description}</p>
+                </article>
+              ))}
             </div>
+          </div>
 
-            <div className="landing-actions landing-actions--compact">
-              <Link to="/register" className="primary-button">
-                立即开始
-              </Link>
-            </div>
+          <div className="home-sheet__column">
+            <div className="home-sheet__heading">处理流程</div>
+            <ol className="home-process-list">
+              {processSteps.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="home-sheet__column">
+            <div className="home-sheet__heading">运行特性</div>
+            <dl className="home-definition-list">
+              {operatingHighlights.map(([term, detail]) => (
+                <div key={term} className="home-definition-item">
+                  <dt>{term}</dt>
+                  <dd>{detail}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
       </main>
