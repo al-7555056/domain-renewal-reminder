@@ -144,9 +144,9 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
   const progress = Math.min(100, Math.round((domain.reminders_sent / domain.reminder_count) * 100));
 
   return (
-    <div className="glass-card rounded-2xl border border-white/40 p-5 shadow-lg">
+    <div className="glass-card rounded-2xl border border-white/40 p-4 shadow-lg sm:p-5 lg:p-6">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="break-all text-lg font-bold text-gray-900">{domain.domain_address}</h3>
@@ -194,18 +194,28 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="rounded-2xl border border-gray-200/80 bg-white/45 p-3 sm:p-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-gray-800">操作区</div>
+              <div className="text-xs text-gray-500">常用操作优先展示，其他管理操作保持收敛。</div>
+            </div>
+            <div className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+              续费工作流
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           <button
             type="button"
             onClick={() => onRenew(domain)}
-            className="flex-1 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100"
+            className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100"
           >
             续费并重置提醒
           </button>
           <button
             type="button"
             onClick={() => onHandle(domain)}
-            className="flex-1 rounded-xl bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700 transition-all hover:bg-sky-100"
+            className="rounded-xl bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition-all hover:bg-sky-100"
           >
             标记已处理
           </button>
@@ -213,7 +223,7 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
             <button
               type="button"
               onClick={() => onStatusChange(domain, 'paused')}
-              className="flex-1 rounded-xl bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-100"
+              className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-100"
             >
               暂停提醒
             </button>
@@ -221,7 +231,7 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
             <button
               type="button"
               onClick={() => onStatusChange(domain, 'active')}
-              className="flex-1 rounded-xl bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700 transition-all hover:bg-teal-100"
+              className="rounded-xl bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-700 transition-all hover:bg-teal-100"
             >
               恢复提醒
             </button>
@@ -230,7 +240,7 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
             <button
               type="button"
               onClick={() => onStatusChange(domain, 'abandoned')}
-              className="flex-1 rounded-xl bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 transition-all hover:bg-rose-100"
+              className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition-all hover:bg-rose-100"
             >
               标记已放弃
             </button>
@@ -238,17 +248,18 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
           <button
             type="button"
             onClick={() => onEdit(domain)}
-            className="flex-1 rounded-xl bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-100"
+            className="rounded-xl bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-100"
           >
             编辑
           </button>
           <button
             type="button"
             onClick={() => onDelete(domain)}
-            className="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition-all hover:bg-red-100"
+            className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition-all hover:bg-red-100"
           >
             删除
           </button>
+          </div>
         </div>
       </div>
     </div>
@@ -466,7 +477,7 @@ export function Dashboard() {
       </header>
 
       <main className="app-main">
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="域名总数" value={String(totalDomains)} />
           <StatCard label="提醒中" value={String(activeCount)} accent="emerald" />
           <StatCard label="已处理" value={String(handledCount)} accent="indigo" />
@@ -476,7 +487,7 @@ export function Dashboard() {
 
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-2xl font-bold text-gray-900">我的域名</h2>
-          <div className="flex w-full gap-2 sm:w-auto">
+          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto">
             <button
               type="button"
               onClick={() => setShowAddModal(true)}
@@ -520,7 +531,7 @@ export function Dashboard() {
 
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-base font-semibold text-gray-900">筛选与视图</div>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
@@ -538,7 +549,7 @@ export function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <FilterSelect
               label="续费网址"
               value={filterRenewalUrl}
@@ -593,7 +604,7 @@ export function Dashboard() {
         ) : filteredDomains.length === 0 ? (
           <EmptyState title="没有匹配结果" description="换一个关键词，或者清除筛选条件后再试。" actionLabel="清除筛选" onAction={clearFilters} />
         ) : viewMode === 'list' ? (
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             {filteredDomains.map((domain) => (
               <DomainCard
                 key={domain.id}
@@ -610,11 +621,11 @@ export function Dashboard() {
           <div className="space-y-6">
             {Object.entries(groupedDomains).map(([renewalUrl, group]) => (
               <div key={renewalUrl} className="glass-card overflow-hidden rounded-2xl shadow-lg">
-                <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500 px-5 py-4 text-white">
+                <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500 px-4 py-4 text-white sm:px-5">
                   <div className="break-all text-base font-bold">{renewalUrl}</div>
                   <div className="mt-1 text-sm text-indigo-100">{group.length} 个域名</div>
                 </div>
-                <div className="space-y-4 p-4">
+                <div className="space-y-4 p-4 sm:p-5">
                   {group.map((domain) => (
                     <DomainCard
                       key={domain.id}
@@ -679,14 +690,14 @@ function StatCard({ label, value, accent = 'indigo' }: { label: string; value: s
   };
 
   return (
-    <div className="glass-card rounded-2xl p-5 shadow-lg">
-      <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white ${accentMap[accent]}`}>
+    <div className="glass-card rounded-2xl p-4 shadow-lg sm:p-5">
+      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-white sm:h-12 sm:w-12 ${accentMap[accent]}`}>
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
       <div className="text-sm font-semibold text-gray-600">{label}</div>
-      <div className="mt-1 text-3xl font-bold text-gray-900">{value}</div>
+      <div className="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">{value}</div>
     </div>
   );
 }
@@ -732,7 +743,7 @@ function EmptyState({
   onAction?: () => void;
 }) {
   return (
-    <div className="glass-card rounded-2xl p-16 text-center shadow-lg">
+    <div className="glass-card rounded-2xl p-10 text-center shadow-lg sm:p-16">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-100">
         <svg className="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
