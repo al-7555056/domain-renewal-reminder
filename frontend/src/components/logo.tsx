@@ -13,7 +13,7 @@ export function BrandLogo({
   compact = false,
   center = false,
   title = '爱自由域名管理',
-  subtitle = 'Domain Management Console',
+  subtitle = 'Domain Renewal Reminder Service',
   iconOnly = false,
   onActivate,
 }: BrandLogoProps) {

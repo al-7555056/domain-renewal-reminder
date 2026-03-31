@@ -1754,11 +1754,14 @@ pre {
 
   .landing-nav--minimal {
     width: 100%;
+    display: grid;
+    gap: 10px;
   }
 
   .landing-entry-button {
     width: 100%;
   }
+
 }
 
 @media (min-width: 641px) {

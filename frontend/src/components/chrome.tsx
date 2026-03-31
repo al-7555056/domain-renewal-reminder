@@ -17,7 +17,9 @@ type StatusBannerProps = {
 };
 
 export function BrandMark({ compact = false }: { compact?: boolean }) {
-  return <BrandLogo compact={compact} title="爱自由域名管理" subtitle="Domain Management Console" />;
+  return (
+    <BrandLogo compact={compact} title="爱自由域名管理" subtitle="Domain Renewal Reminder Service" />
+  );
 }
 
 export function AuthShell({
@@ -34,7 +36,7 @@ export function AuthShell({
         <section className="auth-panel__main">
           <BrandLogo
             title="爱自由域名管理"
-            subtitle="Domain Management Console"
+            subtitle="Domain Renewal Reminder Service"
             onActivate={onBrandActivate}
           />
           <div className="auth-copy">
