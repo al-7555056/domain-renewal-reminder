@@ -1,367 +1,509 @@
 # 完整部署指南
 
-本指南帮助你从零开始部署爱自由域名管理服务到 Cloudflare。
+本指南覆盖这个项目的完整生产部署流程，包括：
+
+- Cloudflare Worker 后端
+- Cloudflare D1 数据库
+- Cloudflare KV
+- Cloudflare Pages 前端
+- 邮件服务配置
+- AI 智能导入所需的智谱国际版环境变量
+- 已有生产库的迁移升级流程
+
+适用项目目录：`domain-renewal-reminder`
 
 ---
 
 ## 部署架构
 
-- **后端**: Cloudflare Workers（API 服务）
-- **前端**: Cloudflare Pages（静态网站）
-- **数据库**: Cloudflare D1（SQLite）
-- **存储**: Cloudflare KV（键值对）
+- 后端：Cloudflare Workers
+- 前端：Cloudflare Pages
+- 数据库：Cloudflare D1
+- 会话与临时数据：Cloudflare KV
+- 定时任务：Cloudflare Cron Triggers
+- AI 识别：智谱国际版 `https://api.z.ai/api/paas/v4/chat/completions`
 
 ---
 
 ## 前置要求
 
-- Node.js v18+
-- Cloudflare 账号（免费）
-- GitHub 账号
+- Node.js 18 或更高版本
+- npm
+- Cloudflare 账号
+- GitHub 仓库
+- 项目代码已在本地可用
+
+建议在项目根目录优先使用本地 Wrangler：
+
+```bash
+npm install
+npx wrangler --version
+```
+
+当前项目使用的 Wrangler 版本建议为 `4.x`。
 
 ---
 
-## 一、后端部署
+## 一、首次后端部署
 
-### 1. 安装 Wrangler
+### 1. 登录 Cloudflare
 
 ```bash
-npm install -g wrangler
-wrangler login
+npx wrangler login
 ```
 
 ### 2. 创建 D1 数据库
 
 ```bash
-wrangler d1 create domain_renewal_db
+npx wrangler d1 create domain_renewal_db
 ```
 
-复制输出的 `database_id`，更新 `wrangler.toml`：
+把命令输出中的 `database_id` 写入 [wrangler.toml](./wrangler.toml)：
 
 ```toml
 [[d1_databases]]
 binding = "DB"
 database_name = "domain_renewal_db"
-database_id = "你的database_id"
-```
-
-初始化数据库：
-
-```bash
-wrangler d1 execute domain_renewal_db --file=schema.sql
+database_id = "你的 database_id"
 ```
 
 ### 3. 创建 KV 命名空间
 
 ```bash
-wrangler kv:namespace create "KV"
+npx wrangler kv namespace create KV
 ```
 
-复制输出的 `id`，更新 `wrangler.toml`：
+把输出中的 `id` 写入 [wrangler.toml](./wrangler.toml)：
 
 ```toml
 [[kv_namespaces]]
 binding = "KV"
-id = "你的KV_id"
+id = "你的 KV id"
 ```
 
-### 4. 设置环境变量
+### 4. 初始化数据库
 
-生成加密密钥：
+新建数据库时，直接执行完整表结构：
+
+```bash
+npx wrangler d1 execute domain_renewal_db --remote --file=schema.sql
+```
+
+Cloudflare D1 官方文档说明 `wrangler d1 execute` 必须使用 `--command` 或 `--file`，而 `--remote` 会直接对远程数据库执行操作。
+
+### 5. 设置 Worker Secrets
+
+生成 32 字节十六进制加密密钥：
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-设置 Secrets：
+设置必须的 secrets：
 
 ```bash
-# 1. 设置管理员密码
-wrangler secret put ADMIN_PASSWORD
-# 输入管理员密码（至少16字符）
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put ENCRYPTION_KEY
+npx wrangler secret put ZAI_API_KEY
+```
 
-# 2. 设置加密密钥
-wrangler secret put ENCRYPTION_KEY
-# 粘贴上面生成的密钥
+说明：
 
-### 5. 部署后端
+- `ADMIN_PASSWORD`：管理员入口密码
+- `ENCRYPTION_KEY`：用于加密 SMTP/API 密钥等敏感数据
+- `ZAI_API_KEY`：智谱国际版 API Key，用于图片和文字智能导入
+
+Cloudflare 官方文档说明，`wrangler secret put` 会创建一个新的 Worker 版本并立即部署。
+
+### 6. 设置可选 Worker Vars
+
+AI 智能导入默认已经内置以下值，不配也能工作：
+
+- `ZAI_BASE_URL=https://api.z.ai/api/paas/v4`
+- `ZAI_VISION_MODEL=GLM-4.6V-Flash`
+
+如果你要显式覆盖，可以在 Cloudflare Dashboard 里为 Worker 添加环境变量，或者在 `wrangler.toml` 中加入：
+
+```toml
+[vars]
+ZAI_BASE_URL = "https://api.z.ai/api/paas/v4"
+ZAI_VISION_MODEL = "GLM-4.6V-Flash"
+```
+
+### 7. 部署后端 Worker
 
 ```bash
-npm install
 npm run deploy
 ```
 
-记录输出的 Worker URL，例如：`https://domain-renewal-reminder.xxx.workers.dev`
+部署成功后，记录 Worker 地址，例如：
+
+```text
+https://domain-renewal-reminder.xxx.workers.dev
+```
+
+### 8. 验证后端
+
+```bash
+curl https://你的-worker.workers.dev/api/health
+```
+
+正常情况下应返回 `success: true`。
 
 ---
 
-## 二、前端部署（Git 集成）
+## 二、前端部署到 Cloudflare Pages
 
 ### 1. 推送代码到 GitHub
 
 ```bash
 git add .
-git commit -m "准备部署"
+git commit -m "prepare deployment"
 git push
 ```
 
-### 2. 在 Cloudflare Pages 中设置
+### 2. 创建 Pages 项目
 
-1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
-2. 进入 **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**
-3. 选择你的 GitHub 仓库
-4. 配置构建设置：
-   - **Framework preset**: None
-   - **Build command**: `cd frontend && npm install && npm run build`
-   - **Build output directory**: `frontend/dist`
-   - **Root directory**: `/` (留空或填 `/`)
-5. 添加环境变量（Production）：
-   - **Variable name**: `VITE_API_URL`
-   - **Value**: `https://你的worker地址.workers.dev/api`
-   - 例如: `https://domain-renewal-reminder.xxx.workers.dev/api`
-6. 点击 **Save and Deploy**
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 进入 `Workers & Pages`
+3. 点击 `Create application`
+4. 选择 `Pages`
+5. 选择 `Connect to Git`
+6. 连接你的 GitHub 仓库
 
-> **重要**: 确保 `VITE_API_URL` 以 `/api` 结尾，且不要有尾部斜杠。
+### 3. 配置构建
 
-### 3. 等待构建完成
+这个仓库的前端位于 `frontend/`，但根目录已经提供了构建脚本，因此推荐直接使用：
 
-构建完成后会得到前端 URL，例如：`https://xxx.pages.dev`
+- Framework preset：`None` 或 `Vite`
+- Build command：`npm run build`
+- Build output directory：`frontend/dist`
+- Root directory：留空
 
-### 4. 无需再配置前端地址
+如果你更喜欢显式写法，也可以使用：
 
-邮件验证链接会自动根据浏览器请求中的 `Origin` 或 `Referer` 推断前端地址，因此后端不需要再额外配置 `FRONTEND_URL`。
+- Build command：`cd frontend && npm install && npm run build`
+- Build output directory：`frontend/dist`
 
-只要前端正确设置 `VITE_API_URL` 指向后端 API，注册和重发验证邮件时就会自动生成正确的前端验证链接。
+Cloudflare Pages 官方文档说明，Pages 通过 Build command 的退出码判断构建是否成功。
+
+### 4. 配置 Pages 环境变量
+
+在 Pages 项目的 Production 环境添加：
+
+```text
+VITE_API_URL=https://你的-worker.workers.dev/api
+```
+
+要求：
+
+- 必须以 `/api` 结尾
+- 不要带尾部斜杠
+
+### 5. 部署并验证前端
+
+保存后触发首次部署。成功后会得到 Pages 地址，例如：
+
+```text
+https://domain-renewal-reminder.pages.dev
+```
+
+检查：
+
+- 登录页可打开
+- 注册与登录正常
+- `/verify` 路由可访问
+- 仪表盘中的“批量导入 / AI 识别”弹窗可打开
 
 ---
 
 ## 三、配置邮件服务
 
-部署完成后，需要配置邮件服务才能发送验证邮件和续期提醒。
+部署完成后，需要先配置邮件服务，注册验证和到期提醒才会真正发出。
 
-### 1. 访问管理员面板
+### 1. 打开管理员面板
 
-访问 `https://你的前端地址/admin`，使用管理员密码登录。
+访问：
 
-### 2. 配置 SMTP
+```text
+https://你的-pages-域名/admin
+```
 
-在"SMTP 配置"标签页中，选择邮件发送方式：
+使用 `ADMIN_PASSWORD` 登录。
 
-**推荐: HTTP API (Resend)**
-- 注册 [Resend](https://resend.com) 账号（免费 100 封/天）
-- 获取 API Key
-- 在管理员面板配置:
-  - 邮件发送方式: HTTP API
-  - API 服务商: Resend
-  - API Key: 你的 Resend API Key
-  - 发件人邮箱: 在 Resend 验证的邮箱
-  - 发件人名称: 爱自由域名管理
+### 2. 推荐方式：HTTP API
 
-**或使用 SMTP (高级)**
-- 配置你的 SMTP 服务器信息
-- 仅支持端口 465 (SSL) 或 587 (TLS)
-- 详见 [EMAIL_SETUP.md](./EMAIL_SETUP.md)
+支持：
 
-### 3. 测试邮件功能
+- Resend
+- SendGrid
+- Mailgun
+- 自定义 HTTP API
 
-注册一个新账号，检查是否收到验证邮件。
+如果你只是个人使用，优先推荐 Resend。
+
+### 3. 高级方式：SMTP
+
+支持：
+
+- 465
+- 587
+
+不支持：
+
+- 25
+
+更多配置细节见 [EMAIL_SETUP.md](./EMAIL_SETUP.md)。
 
 ---
 
-## 四、验证部署
+## 四、AI 智能导入配置说明
 
-### 测试后端
+当前 AI 导入功能包括：
+
+- 粘贴文字识别
+- 图片截图识别
+- AI 识别历史
+- 文字识别失败重试
+- 常见注册商续费入口自动补全
+
+必须配置：
 
 ```bash
-curl https://你的worker地址.workers.dev/api/health
+npx wrangler secret put ZAI_API_KEY
 ```
 
-### 测试前端
+可选配置：
 
-访问前端 URL，尝试注册和登录。
+```text
+ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+ZAI_VISION_MODEL=GLM-4.6V-Flash
+```
 
-### 测试管理员
+当前实现默认不会长期保存原始图片，历史中只保存：
 
-访问 `https://你的前端地址.pages.dev/admin`，使用管理员密码登录。
+- 识别摘要
+- 草稿结果
+- 警告信息
+- 错误信息
 
 ---
 
-## 常见问题
+## 五、已有生产库升级流程
 
-### Q: 前端构建失败
+如果你的数据库不是全新创建的，不要重复执行 `schema.sql`。应按迁移文件顺序升级。
 
-**错误**: `Missing script: "build"`
-
-**解决**: 确保根目录 `package.json` 中有：
-```json
-"scripts": {
-  "build": "cd frontend && npm install && npm run build"
-}
-```
-
-### Q: 前端无法连接后端
-
-**解决**: 
-1. 检查 Cloudflare Pages 环境变量 `VITE_API_URL` 是否正确
-2. 确保 URL 以 `/api` 结尾，例如: `https://xxx.workers.dev/api`
-3. 不要有尾部斜杠
-4. 在 Pages 设置中重新部署
-
-### Q: 收不到验证邮件
-
-**解决**:
-1. 检查管理员面板是否配置了邮件服务
-2. 检查前端请求是否从正确域名发起，避免代理或中转层改写 `Origin` / `Referer`
-3. 查看 Worker 日志: `wrangler tail`
-4. 检查垃圾邮件文件夹
-5. 尝试使用 Resend HTTP API 而不是 SMTP
-
-### Q: 验证链接 404
-
-**解决**:
-1. 确保前端已部署最新版本（包含 `/verify` 路由）
-2. 检查前端是否使用正确的 `VITE_API_URL`
-3. 清除浏览器缓存后重试
-
-### Q: 管理员密码错误
-
-**解决**:
-```bash
-wrangler secret put ADMIN_PASSWORD
-# 重新输入密码
-```
-
----
-
-## 更新部署
-
-### 更新后端
+### 升级命令
 
 ```bash
-# 修改代码后
-npm run deploy
+npx wrangler d1 execute domain_renewal_db --remote --file=migrations/0002_email_send_logs.sql
+npx wrangler d1 execute domain_renewal_db --remote --file=migrations/0003_domain_status_workflow.sql
+npx wrangler d1 execute domain_renewal_db --remote --file=migrations/0004_domain_workflow_fields.sql
+npx wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_history.sql
 ```
 
-### 更新前端
+迁移说明：
+
+- `0002_email_send_logs.sql`：邮件发送记录表
+- `0003_domain_status_workflow.sql`：域名状态字段与续费闭环字段
+- `0004_domain_workflow_fields.sql`：负责人与处理时间字段
+- `0005_ai_import_history.sql`：AI 导入历史、失败重试、导入状态跟踪
+
+### 本次已执行的生产迁移
+
+2026-04-22 我已在远程数据库 `domain_renewal_db` 上执行：
 
 ```bash
-# 修改代码后
-git add .
-git commit -m "更新"
-git push
-# Cloudflare Pages 会自动构建和部署
+npx wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_history.sql
 ```
 
----
+执行结果为成功，Wrangler 返回：
 
-## 自定义域名（可选）
-
-### 后端自定义域名
-
-1. Workers & Pages > 你的 Worker > Triggers > Custom Domains
-2. 添加域名，如 `api.yourdomain.com`
-
-### 前端自定义域名
-
-1. Workers & Pages > 你的 Pages 项目 > Custom domains
-2. 添加域名，如 `app.yourdomain.com`
-3. 按照提示配置 DNS (CNAME 记录)
-4. 等待 SSL 证书生成
-5. 更新前端 `VITE_API_URL`，确保它仍然指向正确的后端 API 地址
-6. **重要**: 重新部署前端以清除 CDN 缓存:
-   ```bash
-   cd frontend
-   npm run build
-   npx wrangler pages deploy dist --project-name=domain-renewal-reminder
-   ```
-   或在 Cloudflare Dashboard 中点击 "Retry deployment"
-
----
-
-## 数据管理
-
-### 备份数据库
-
-```bash
-wrangler d1 export domain_renewal_db --output=backup.sql
-```
-
-### 查询数据
-
-```bash
-wrangler d1 execute domain_renewal_db --command="SELECT COUNT(*) FROM users;"
-```
-
-### 查看日志
-
-```bash
-wrangler tail
-```
-
----
-
-## 数据库迁移说明
-
-### 新建数据库
-
-新建 D1 数据库时，直接执行一次完整初始化即可：
-
-```bash
-wrangler d1 execute domain_renewal_db --remote --file=schema.sql
-```
-
-### 已有旧数据库升级
-
-如果你的远程数据库是在早期版本创建的，不要重复执行 `schema.sql`，而是按迁移文件顺序升级：
-
-```bash
-wrangler d1 execute domain_renewal_db --remote --file=migrations/0002_email_send_logs.sql
-wrangler d1 execute domain_renewal_db --remote --file=migrations/0003_domain_status_workflow.sql
-wrangler d1 execute domain_renewal_db --remote --file=migrations/0004_domain_workflow_fields.sql
-```
+- `Processed 4 queries`
+- `success: true`
+- `changed_db: true`
 
 说明：
 
-- `0002_email_send_logs.sql`：补发信记录表
-- `0003_domain_status_workflow.sql`：补域名状态字段、续费闭环字段和状态索引
+- 后续我尝试做只读校验时，Cloudflare API 返回了两次临时 `fetch failed`
+- 这属于网络/控制面连通性问题，不是 SQL 执行失败
+- 迁移命令本身已经明确成功提交
 
-### 本次版本上线前建议检查
+### 建议的升级后校验
 
-```bash
-wrangler d1 execute domain_renewal_db --remote --command="PRAGMA table_info(domains);"
-wrangler d1 execute domain_renewal_db --remote --command="SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
-```
-
-`domains` 表里应至少包含以下新字段：
-
-- `status`
-- `status_note`
-- `owner`
-- `processed_at`
-- `last_renewed_at`
-
-## Workflow Upgrade Notes
-
-For the renewal workflow release, existing D1 databases must also run:
+网络正常时，可执行：
 
 ```bash
-wrangler d1 execute domain_renewal_db --remote --file=migrations/0004_domain_workflow_fields.sql
+npx wrangler d1 execute domain_renewal_db --remote --command="SELECT name FROM sqlite_master WHERE type='table' AND name='ai_import_history';"
+npx wrangler d1 execute domain_renewal_db --remote --command="PRAGMA table_info(ai_import_history);"
 ```
-
-After the upgrade, confirm `domains` includes:
-
-- `status`
-- `status_note`
-- `owner`
-- `processed_at`
-- `last_renewed_at`
-
-This release expects:
-
-- `POST /api/domains/:id/renew` to reset reminder progress and move the domain into the next cycle
-- `PUT /api/domains/:id` to support `status`, `statusNote`, `owner`, and `processedAt`
-- reminder cron to skip all non-`active` domains
 
 ---
 
-完成！你的服务已成功部署。🎉
+## 六、部署后检查清单
+
+后端：
+
+- `GET /api/health` 正常
+- Cron 仍存在
+- D1 与 KV 绑定正常
+
+前端：
+
+- 登录、注册、验证页正常
+- 域名新增、编辑、批量导入正常
+- AI 识别弹窗可打开
+- AI 历史列表可展示
+
+邮件：
+
+- 注册验证邮件可发出
+- 管理员面板可保存邮件配置
+
+AI：
+
+- 文字识别可返回草稿
+- 图片识别可返回草稿
+- 历史记录可载入
+- 文字失败记录可重试
+
+---
+
+## 七、日常更新流程
+
+### 仅更新后端代码
+
+```bash
+npm run deploy
+```
+
+### 更新 Worker secrets
+
+```bash
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put ENCRYPTION_KEY
+npx wrangler secret put ZAI_API_KEY
+```
+
+### 更新数据库结构
+
+新增迁移文件后，执行：
+
+```bash
+npx wrangler d1 execute domain_renewal_db --remote --file=migrations/你的新迁移.sql
+```
+
+### 更新前端代码
+
+```bash
+git add .
+git commit -m "update frontend"
+git push
+```
+
+如果 Pages 连接了 GitHub，推送后会自动重新构建。
+
+---
+
+## 八、自定义域名
+
+### Worker 自定义域名
+
+在 Cloudflare Dashboard 中：
+
+1. 进入 Worker
+2. 打开 `Triggers`
+3. 添加自定义域名，例如 `api.example.com`
+
+### Pages 自定义域名
+
+在 Pages 项目中：
+
+1. 打开 `Custom domains`
+2. 添加域名，例如 `app.example.com`
+3. 完成 DNS 配置
+4. 更新 Pages 的 `VITE_API_URL`
+5. 重新部署 Pages
+
+---
+
+## 九、常用运维命令
+
+查看 Worker 日志：
+
+```bash
+npx wrangler tail
+```
+
+导出远程数据库：
+
+```bash
+npx wrangler d1 export domain_renewal_db --remote --output=backup.sql
+```
+
+查看用户数量：
+
+```bash
+npx wrangler d1 execute domain_renewal_db --remote --command="SELECT COUNT(*) AS count FROM users;"
+```
+
+查看域名数量：
+
+```bash
+npx wrangler d1 execute domain_renewal_db --remote --command="SELECT COUNT(*) AS count FROM domains;"
+```
+
+---
+
+## 十、常见问题
+
+### 1. 前端无法连接后端
+
+检查：
+
+- `VITE_API_URL` 是否正确
+- 是否以 `/api` 结尾
+- 是否忘记重新部署 Pages
+
+### 2. 收不到验证邮件
+
+检查：
+
+- 管理员面板是否保存了邮件配置
+- 发件服务商账号是否可用
+- 垃圾邮件箱
+- Worker 日志 `npx wrangler tail`
+
+### 3. AI 识别不可用
+
+检查：
+
+- `ZAI_API_KEY` 是否已设置
+- Worker 是否为最新版本
+- 是否能从 Worker 网络环境访问 `https://api.z.ai`
+
+### 4. D1 迁移失败
+
+检查：
+
+- 是否用了错误的数据库名
+- 是否忘记加 `--remote`
+- 当前 Cloudflare 登录账号是否有该数据库权限
+
+### 5. 更新 secret 后功能仍旧异常
+
+Cloudflare 文档说明 `wrangler secret put` 会立即创建并部署新版本。若仍异常，建议再执行一次：
+
+```bash
+npm run deploy
+```
+
+---
+
+部署完成后，建议第一时间手动测试以下流程：
+
+1. 注册并验证一个测试账号
+2. 新增一个域名
+3. 试一次 CSV 导入
+4. 试一次 AI 图片或文字导入
+5. 在管理员面板保存邮件配置

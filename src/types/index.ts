@@ -49,6 +49,55 @@ export type DomainInput = {
   reminderCount: number;
 };
 
+export type AiImportDefaults = {
+  renewalUrl?: string;
+  usagePeriodYears?: number;
+  reminderDaysOffset?: number;
+  reminderEmail?: string;
+  reminderCount?: number;
+};
+
+export type AiImportRequest = {
+  sourceType: 'text' | 'image';
+  text?: string;
+  imageDataUrl?: string;
+  sourceLabel?: string;
+  defaults?: AiImportDefaults;
+};
+
+export type AiImportDraft = {
+  domainAddress: string;
+  renewalUrl: string;
+  registrationDate: string;
+  usagePeriodYears: number;
+  reminderDaysOffset: number;
+  reminderEmail: string;
+  reminderCount: number;
+  confidence: number | null;
+  sourceSnippet: string | null;
+  warnings: string[];
+};
+
+export type AiImportHistoryStatus = 'success' | 'failed' | 'imported';
+
+export type AiImportHistoryEntry = {
+  id: string;
+  user_id: string;
+  source_type: 'text' | 'image';
+  source_label: string;
+  source_text?: string | null;
+  model?: string | null;
+  status: AiImportHistoryStatus;
+  drafts_json?: string | null;
+  warnings_json?: string | null;
+  error_message?: string | null;
+  result_count: number;
+  retry_of_history_id?: string | null;
+  imported_at?: number | null;
+  created_at: number;
+  updated_at: number;
+};
+
 export type DomainFilters = {
   renewalUrl?: string;
   usagePeriodYears?: number;

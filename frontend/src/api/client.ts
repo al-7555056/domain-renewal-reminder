@@ -10,7 +10,7 @@ type ApiError = {
   details?: unknown;
 };
 
-type DomainPayload = {
+export type DomainPayload = {
   domainAddress: string;
   renewalUrl: string;
   registrationDate: string;
@@ -18,6 +18,46 @@ type DomainPayload = {
   reminderDaysOffset: number;
   reminderEmail: string;
   reminderCount: number;
+};
+
+export type AiImportDefaults = {
+  renewalUrl?: string;
+  usagePeriodYears?: number;
+  reminderDaysOffset?: number;
+  reminderEmail?: string;
+  reminderCount?: number;
+};
+
+export type AiImportDraft = DomainPayload & {
+  confidence: number | null;
+  sourceSnippet: string | null;
+  warnings: string[];
+};
+
+export type AiImportRequest = {
+  sourceType: 'text' | 'image';
+  text?: string;
+  imageDataUrl?: string;
+  sourceLabel?: string;
+  defaults?: AiImportDefaults;
+};
+
+export type AiImportHistoryItem = {
+  id: string;
+  sourceType: 'text' | 'image';
+  sourceLabel: string;
+  status: 'success' | 'failed' | 'imported';
+  model: string | null;
+  drafts: AiImportDraft[];
+  warnings: string[];
+  errorMessage: string | null;
+  resultCount: number;
+  retryOfHistoryId: string | null;
+  importedAt: number | null;
+  createdAt: number;
+  updatedAt: number;
+  canRetry: boolean;
+  canLoadDrafts: boolean;
 };
 
 type SmtpConfigPayload = {
@@ -180,6 +220,30 @@ class ApiClient {
     return this.request('/domains/batch', {
       method: 'POST',
       body: JSON.stringify(domains),
+    });
+  }
+
+  async parseDomainsWithAi(payload: AiImportRequest) {
+    return this.request<{ drafts: AiImportDraft[]; warnings: string[]; model: string; historyId?: string | null }>('/domains/ai-parse', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getAiImportHistory(limit: number = 10) {
+    return this.request<{ history: AiImportHistoryItem[] }>(`/domains/ai-history?limit=${limit}`);
+  }
+
+  async retryAiImportHistory(id: string, defaults?: AiImportDefaults) {
+    return this.request<{ drafts: AiImportDraft[]; warnings: string[]; model: string; historyId?: string | null }>(`/domains/ai-history/${id}/retry`, {
+      method: 'POST',
+      body: JSON.stringify({ defaults }),
+    });
+  }
+
+  async markAiImportHistoryImported(id: string) {
+    return this.request(`/domains/ai-history/${id}/mark-imported`, {
+      method: 'POST',
     });
   }
 

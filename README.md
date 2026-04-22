@@ -24,6 +24,7 @@
 **核心特性：**
 - ✅ 用户注册、登录和邮箱验证
 - ✅ 域名管理（添加、编辑、删除、批量导入）
+- ✅ AI 智能导入（支持图片识别和文字解析后确认导入）
 - ✅ 自动计算到期日期和提醒开始日期
 - ✅ 定时邮件提醒（每天自动检查）
 - ✅ 灵活的邮件配置（支持 HTTP API 和 SMTP）
@@ -106,6 +107,11 @@ wrangler kv:namespace create "KV" --preview
 #### 启动开发服务器
 
 ```bash
+# 设置必须的 Worker secrets（示例）
+wrangler secret put ADMIN_PASSWORD
+wrangler secret put ENCRYPTION_KEY
+wrangler secret put ZAI_API_KEY
+
 # 启动后端
 npm run dev
 
@@ -184,6 +190,37 @@ domain-renewal-reminder/
 
 详细步骤见 [邮件服务配置](EMAIL_SETUP.md)。
 
+### 🤖 AI 智能导入
+
+仪表盘中的“批量导入 / AI 识别”现已支持三种来源：
+
+- CSV 模板导入
+- 粘贴注册商列表、账单或提醒邮件文字
+- 上传后台截图、账单截图等图片
+- 最近识别历史、成功草稿载入和文字来源失败重试
+- 常见注册商自动补全续费入口（Cloudflare、GoDaddy、Namecheap、Spaceship、Porkbun）
+
+AI 识别流程采用“先识别、后确认、再入库”的方式：
+
+- 后端通过 Cloudflare Worker 调用智谱国际版 `https://api.z.ai/api/paas/v4/chat/completions`
+- 默认视觉模型为 `GLM-4.6V-Flash`
+- 识别结果会先生成可编辑草稿，用户确认后才批量导入
+- 识别历史只保存摘要、草稿和错误信息；图片原始内容不会长期入库
+
+需要配置以下 Worker secrets / vars：
+
+```bash
+wrangler secret put ZAI_API_KEY
+```
+
+可选变量：
+
+```bash
+# 默认值已内置，可按需覆盖
+ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+ZAI_VISION_MODEL=GLM-4.6V-Flash
+```
+
 ### 🔄 续费闭环
 
 当前版本已经支持完整的基础状态流转：
@@ -215,6 +252,7 @@ wrangler d1 execute domain_renewal_db --remote --file=schema.sql
 wrangler d1 execute domain_renewal_db --remote --file=migrations/0002_email_send_logs.sql
 wrangler d1 execute domain_renewal_db --remote --file=migrations/0003_domain_status_workflow.sql
 wrangler d1 execute domain_renewal_db --remote --file=migrations/0004_domain_workflow_fields.sql
+wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_history.sql
 ```
 
 升级后 `domains` 表应包含以下字段：

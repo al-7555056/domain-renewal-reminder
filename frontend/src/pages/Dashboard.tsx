@@ -5,7 +5,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../api/client';
+import { apiClient, type AiImportDraft, type AiImportHistoryItem, type DomainPayload } from '../api/client';
 import { BrandLogo } from '../components/logo';
 import { useAuth } from '../contexts/useAuth';
 
@@ -43,15 +43,15 @@ interface DomainsResponse {
   totalPages: number;
 }
 
-interface DomainFormData {
-  domainAddress: string;
-  renewalUrl: string;
-  registrationDate: string;
-  usagePeriodYears: number;
-  reminderDaysOffset: number;
-  reminderEmail: string;
-  reminderCount: number;
-}
+type DomainFormData = DomainPayload;
+
+type ImportSourceMode = 'csv' | 'text' | 'image';
+
+type BatchImportResult = {
+  success: number;
+  failed: number;
+  errors: string[];
+};
 
 interface BannerState {
   tone: 'success' | 'error';
@@ -60,6 +60,10 @@ interface BannerState {
 
 function formatDate(timestamp: number) {
   return new Date(timestamp * 1000).toLocaleDateString('zh-CN');
+}
+
+function formatDateTime(timestamp: number) {
+  return new Date(timestamp * 1000).toLocaleString('zh-CN');
 }
 
 function getDaysUntilExpiry(expiryTimestamp: number) {
@@ -674,7 +678,13 @@ export function Dashboard() {
       </main>
 
       {showAddModal && <AddDomainModal onClose={() => setShowAddModal(false)} onSuccess={loadDomains} />}
-      {showBatchImportModal && <BatchImportModal onClose={() => setShowBatchImportModal(false)} onSuccess={loadDomains} />}
+      {showBatchImportModal && (
+        <BatchImportModal
+          onClose={() => setShowBatchImportModal(false)}
+          onSuccess={loadDomains}
+          defaultReminderEmail={user?.email || ''}
+        />
+      )}
       {editingDomain && <EditDomainModal domain={editingDomain} onClose={() => setEditingDomain(null)} onSuccess={loadDomains} />}
       {deletingDomain && <DeleteConfirmDialog domain={deletingDomain} onClose={() => setDeletingDomain(null)} onSuccess={loadDomains} />}
     </div>
@@ -825,14 +835,49 @@ function AddDomainModal({ onClose, onSuccess }: AddDomainModalProps) {
 
 interface BatchImportModalProps {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => void | Promise<void>;
+  defaultReminderEmail: string;
 }
 
-function BatchImportModal({ onClose, onSuccess }: BatchImportModalProps) {
-  const [file, setFile] = useState<File | null>(null);
+function BatchImportModal({ onClose, onSuccess, defaultReminderEmail }: BatchImportModalProps) {
+  const [mode, setMode] = useState<ImportSourceMode>('csv');
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [textInput, setTextInput] = useState('');
+  const [defaults, setDefaults] = useState<DomainFormData>({
+    domainAddress: '',
+    renewalUrl: '',
+    registrationDate: '',
+    usagePeriodYears: 1,
+    reminderDaysOffset: 30,
+    reminderEmail: defaultReminderEmail,
+    reminderCount: 3,
+  });
+  const [drafts, setDrafts] = useState<AiImportDraft[]>([]);
+  const [parseWarnings, setParseWarnings] = useState<string[]>([]);
+  const [parsedModel, setParsedModel] = useState('');
+  const [historyItems, setHistoryItems] = useState<AiImportHistoryItem[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [result, setResult] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
+  const [result, setResult] = useState<BatchImportResult | null>(null);
+
+  const loadHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await apiClient.getAiImportHistory(8);
+      if (response.success && response.data) {
+        setHistoryItems(response.data.history || []);
+      }
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadHistory();
+  }, [loadHistory]);
 
   const downloadTemplate = () => {
     const template = `domainAddress,renewalUrl,registrationDate,usagePeriodYears,reminderDaysOffset,reminderEmail,reminderCount
@@ -875,21 +920,39 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
     });
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!file) {
-      setError('请先选择 CSV 文件。');
-      return;
-    }
-
-    setLoading(true);
+  const clearFeedback = () => {
     setError('');
     setResult(null);
+  };
+
+  const switchMode = (nextMode: ImportSourceMode) => {
+    setMode(nextMode);
+    setDrafts([]);
+    setParseWarnings([]);
+    setParsedModel('');
+    setCurrentHistoryId(null);
+    clearFeedback();
+  };
+
+  const updateDraft = (index: number, field: keyof DomainPayload, value: string | number) => {
+    setDrafts((current) =>
+      current.map((draft, currentIndex) =>
+        currentIndex === index
+          ? {
+              ...draft,
+              [field]: value,
+            }
+          : draft
+      )
+    );
+  };
+
+  const applyBatchImport = async (records: DomainPayload[]) => {
+    setLoading(true);
+    clearFeedback();
 
     try {
-      const text = await file.text();
-      const domains = parseCsv(text);
-      const response = await apiClient.batchAddDomains(domains);
+      const response = await apiClient.batchAddDomains(records);
 
       if (response.success && response.data) {
         const data = response.data as {
@@ -905,47 +968,535 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
         });
 
         if (data.successCount > 0) {
-          onSuccess();
+          if (currentHistoryId) {
+            await apiClient.markAiImportHistoryImported(currentHistoryId);
+          }
+          await onSuccess();
+          await loadHistory();
         }
       } else {
         setError(response.error?.message || '批量导入失败。');
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '解析文件失败。');
+      setError(caught instanceof Error ? caught.message : '导入失败。');
     } finally {
       setLoading(false);
     }
   };
 
+  const readFileAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+      reader.onerror = () => reject(new Error('读取图片失败。'));
+      reader.readAsDataURL(file);
+    });
+
+  const handleCsvImport = async () => {
+    if (!csvFile) {
+      setError('请先选择 CSV 文件。');
+      return;
+    }
+
+    const text = await csvFile.text();
+    const domains = parseCsv(text);
+    await applyBatchImport(domains);
+  };
+
+  const handleAiParse = async () => {
+    clearFeedback();
+    setParseWarnings([]);
+    setParsedModel('');
+    setDrafts([]);
+    setCurrentHistoryId(null);
+
+    const payloadDefaults = {
+      renewalUrl: defaults.renewalUrl.trim() || undefined,
+      usagePeriodYears: defaults.usagePeriodYears,
+      reminderDaysOffset: defaults.reminderDaysOffset,
+      reminderEmail: defaults.reminderEmail.trim() || undefined,
+      reminderCount: defaults.reminderCount,
+    };
+
+    if (mode === 'text') {
+      if (!textInput.trim()) {
+        setError('请先粘贴域名相关文字。');
+        return;
+      }
+    } else if (!imageFile) {
+      setError('请先选择一张图片。');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await apiClient.parseDomainsWithAi({
+        sourceType: mode === 'text' ? 'text' : 'image',
+        text: mode === 'text' ? textInput : undefined,
+        imageDataUrl: mode === 'image' && imageFile ? await readFileAsDataUrl(imageFile) : undefined,
+        sourceLabel: mode === 'image' ? imageFile?.name : '粘贴文字识别',
+        defaults: payloadDefaults,
+      });
+
+      if (response.success && response.data) {
+        setDrafts(response.data.drafts || []);
+        setParseWarnings(response.data.warnings || []);
+        setParsedModel(response.data.model || '');
+        setCurrentHistoryId(response.data.historyId || null);
+        void loadHistory();
+
+        if (!response.data.drafts?.length) {
+          setError('没有识别出可导入的域名，请调整图片或文字后重试。');
+        }
+      } else {
+        setError(response.error?.message || 'AI 识别失败。');
+        setCurrentHistoryId(response.data?.historyId || null);
+        void loadHistory();
+      }
+    } catch {
+      setError('网络错误，AI 识别未完成。');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAiImport = async () => {
+    if (!drafts.length) {
+      setError('请先执行 AI 识别。');
+      return;
+    }
+
+    const firstInvalid = drafts.find(
+      (draft) =>
+        !draft.domainAddress.trim() ||
+        !draft.renewalUrl.trim() ||
+        !draft.registrationDate.trim() ||
+        !draft.reminderEmail.trim() ||
+        !Number.isFinite(draft.usagePeriodYears) ||
+        !Number.isFinite(draft.reminderDaysOffset) ||
+        !Number.isFinite(draft.reminderCount)
+    );
+
+    if (firstInvalid) {
+      setError('仍有未补全的识别结果，请先修正后再导入。');
+      return;
+    }
+
+    await applyBatchImport(
+      drafts.map((draft) => ({
+        domainAddress: draft.domainAddress.trim(),
+        renewalUrl: draft.renewalUrl.trim(),
+        registrationDate: draft.registrationDate.trim(),
+        usagePeriodYears: draft.usagePeriodYears,
+        reminderDaysOffset: draft.reminderDaysOffset,
+        reminderEmail: draft.reminderEmail.trim(),
+        reminderCount: draft.reminderCount,
+      }))
+    );
+  };
+
+  const loadDraftsFromHistory = (item: AiImportHistoryItem) => {
+    setMode(item.sourceType === 'image' ? 'image' : 'text');
+    setDrafts(item.drafts || []);
+    setParseWarnings(item.warnings || []);
+    setParsedModel(item.model || '');
+    setCurrentHistoryId(item.id);
+    clearFeedback();
+  };
+
+  const handleRetryHistory = async (item: AiImportHistoryItem) => {
+    setLoading(true);
+    clearFeedback();
+    setCurrentHistoryId(null);
+
+    try {
+      const response = await apiClient.retryAiImportHistory(item.id, {
+        renewalUrl: defaults.renewalUrl.trim() || undefined,
+        usagePeriodYears: defaults.usagePeriodYears,
+        reminderDaysOffset: defaults.reminderDaysOffset,
+        reminderEmail: defaults.reminderEmail.trim() || undefined,
+        reminderCount: defaults.reminderCount,
+      });
+
+      if (response.success && response.data) {
+        setMode('text');
+        setDrafts(response.data.drafts || []);
+        setParseWarnings(response.data.warnings || []);
+        setParsedModel(response.data.model || '');
+        setCurrentHistoryId(response.data.historyId || null);
+        await loadHistory();
+      } else {
+        setError(response.error?.message || '历史记录重试失败。');
+        setCurrentHistoryId(response.data?.historyId || null);
+        await loadHistory();
+      }
+    } catch {
+      setError('网络错误，历史重试未完成。');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (mode === 'csv') {
+      await handleCsvImport();
+      return;
+    }
+
+    if (drafts.length > 0) {
+      await handleAiImport();
+      return;
+    }
+
+    await handleAiParse();
+  };
+
+  const primaryButtonLabel =
+    mode === 'csv'
+      ? loading
+        ? '导入中...'
+        : '开始导入'
+      : drafts.length > 0
+        ? loading
+          ? '导入中...'
+          : '确认导入识别结果'
+        : loading
+          ? '识别中...'
+          : '开始 AI 识别';
+
+  const isPrimaryDisabled =
+    loading ||
+    Boolean(result) ||
+    (mode === 'csv' && !csvFile) ||
+    (mode === 'text' && !drafts.length && !textInput.trim()) ||
+    (mode === 'image' && !drafts.length && !imageFile);
+
   return (
-    <ModalShell title="批量导入域名" onClose={onClose}>
+    <ModalShell title="批量导入 / AI 识别" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {[
+            { key: 'csv', label: 'CSV 导入' },
+            { key: 'text', label: '粘贴文字' },
+            { key: 'image', label: '图片识别' },
+          ].map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => switchMode(item.key as ImportSourceMode)}
+              className={`rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                mode === item.key
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  : 'border border-gray-300 bg-white/80 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-          先下载模板，按列填写后再上传。当前支持标准 CSV，不支持带逗号转义的复杂内容。
+          {mode === 'csv'
+            ? '先下载模板，按列填写后再上传。当前支持标准 CSV，不支持带逗号转义的复杂内容。'
+            : 'AI 会先识别为导入草稿，你确认或修正后才会真正入库。建议先填写默认续费网址和提醒邮箱，提高识别后的可导入率。'}
         </div>
 
-        <button
-          type="button"
-          onClick={downloadTemplate}
-          className="w-full rounded-xl border-2 border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-50"
-        >
-          下载 CSV 模板
-        </button>
+        {mode === 'csv' ? (
+          <>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className="w-full rounded-xl border-2 border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-50"
+            >
+              下载 CSV 模板
+            </button>
 
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">选择 CSV 文件</label>
-          <input
-            type="file"
-            accept=".csv"
-            onChange={(event) => {
-              const selected = event.target.files?.[0] || null;
-              setFile(selected);
-              setError('');
-              setResult(null);
-            }}
-            className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm"
-          />
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-gray-700">选择 CSV 文件</label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(event) => {
+                  const selected = event.target.files?.[0] || null;
+                  setCsvFile(selected);
+                  clearFeedback();
+                }}
+                className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <TextField
+                label="默认续费网址"
+                value={defaults.renewalUrl}
+                onChange={(value) => setDefaults({ ...defaults, renewalUrl: value })}
+                placeholder="https://registrar.example.com/renew"
+                type="url"
+              />
+              <TextField
+                label="默认提醒邮箱"
+                value={defaults.reminderEmail}
+                onChange={(value) => setDefaults({ ...defaults, reminderEmail: value })}
+                placeholder="you@example.com"
+                type="email"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <NumberField
+                label="默认使用年限"
+                value={defaults.usagePeriodYears}
+                onChange={(value) => setDefaults({ ...defaults, usagePeriodYears: value })}
+                min={1}
+                max={100}
+              />
+              <NumberField
+                label="默认提前提醒天数"
+                value={defaults.reminderDaysOffset}
+                onChange={(value) => setDefaults({ ...defaults, reminderDaysOffset: value })}
+                min={1}
+                max={365}
+              />
+              <NumberField
+                label="默认提醒次数"
+                value={defaults.reminderCount}
+                onChange={(value) => setDefaults({ ...defaults, reminderCount: value })}
+                min={1}
+                max={30}
+              />
+            </div>
+
+            {mode === 'text' ? (
+              <TextAreaField
+                label="粘贴域名文字"
+                value={textInput}
+                onChange={(value) => {
+                  setTextInput(value);
+                  setDrafts([]);
+                  setParseWarnings([]);
+                  clearFeedback();
+                }}
+                placeholder="可以粘贴注册商后台列表、账单文字、提醒邮件内容等。"
+              />
+            ) : (
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">上传截图或账单图片</label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  onChange={(event) => {
+                    const selected = event.target.files?.[0] || null;
+                    setImageFile(selected);
+                    setDrafts([]);
+                    setParseWarnings([]);
+                    clearFeedback();
+                  }}
+                  className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500">建议使用清晰截图，优先包含域名、到期日期、续费入口或提醒邮箱等关键信息。</p>
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="rounded-2xl border border-gray-200 bg-white/80 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-gray-900">最近识别历史</div>
+              <div className="text-xs text-gray-500">仅保存识别摘要和草稿，不长期保存原始图片内容。</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadHistory()}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50"
+            >
+              刷新
+            </button>
+          </div>
+
+          {loadingHistory ? (
+            <div className="text-sm text-gray-500">历史加载中...</div>
+          ) : historyItems.length === 0 ? (
+            <div className="text-sm text-gray-500">还没有 AI 识别历史。</div>
+          ) : (
+            <div className="space-y-3">
+              {historyItems.map((item) => (
+                <div key={item.id} className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="truncate text-sm font-semibold text-gray-900">{item.sourceLabel}</div>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            item.status === 'failed'
+                              ? 'bg-red-100 text-red-700'
+                              : item.status === 'imported'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-indigo-100 text-indigo-700'
+                          }`}
+                        >
+                          {item.status === 'failed' ? '失败' : item.status === 'imported' ? '已导入' : '成功'}
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
+                          {item.sourceType === 'image' ? '图片' : '文字'}
+                        </span>
+                      </div>
+                      <div className="mt-1 text-xs text-gray-500">
+                        {formatDateTime(item.createdAt)}
+                        {item.model ? ` · ${item.model}` : ''}
+                        {item.resultCount > 0 ? ` · ${item.resultCount} 条记录` : ''}
+                      </div>
+                      {item.errorMessage && <div className="mt-2 text-sm text-red-600">{item.errorMessage}</div>}
+                      {!item.errorMessage && item.warnings.length > 0 && (
+                        <div className="mt-2 text-sm text-amber-700">{item.warnings[0]}</div>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {item.canLoadDrafts && (
+                        <button
+                          type="button"
+                          onClick={() => loadDraftsFromHistory(item)}
+                          className="rounded-lg border border-indigo-300 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-50"
+                        >
+                          载入草稿
+                        </button>
+                      )}
+                      {item.canRetry && (
+                        <button
+                          type="button"
+                          onClick={() => void handleRetryHistory(item)}
+                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50"
+                        >
+                          重试
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        {!!parseWarnings.length && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="font-semibold">识别提示</div>
+            <div className="mt-2 space-y-1">
+              {parseWarnings.map((warning) => (
+                <div key={warning}>{warning}</div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!!drafts.length && (
+          <div className="space-y-4 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-indigo-900">AI 识别预览</div>
+                <div className="text-xs text-indigo-700">
+                  已识别 {drafts.length} 条记录{parsedModel ? `，模型：${parsedModel}` : ''}。导入前可逐条修正。
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDrafts([]);
+                  setParseWarnings([]);
+                  setParsedModel('');
+                  clearFeedback();
+                }}
+                className="rounded-lg border border-indigo-300 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-50"
+              >
+                重新识别
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {drafts.map((draft, index) => (
+                <div key={`${draft.domainAddress || 'draft'}-${index}`} className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm">
+                  <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm font-semibold text-gray-900">记录 #{index + 1}</div>
+                    {draft.confidence !== null && (
+                      <div className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                        置信度 {Math.round(draft.confidence * 100)}%
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <TextField
+                      label="域名地址"
+                      value={draft.domainAddress}
+                      onChange={(value) => updateDraft(index, 'domainAddress', value)}
+                      placeholder="example.com"
+                    />
+                    <TextField
+                      label="续费网址"
+                      value={draft.renewalUrl}
+                      onChange={(value) => updateDraft(index, 'renewalUrl', value)}
+                      placeholder="https://example.com/renew"
+                      type="url"
+                    />
+                    <TextField
+                      label="注册日期"
+                      value={draft.registrationDate}
+                      onChange={(value) => updateDraft(index, 'registrationDate', value)}
+                      type="date"
+                    />
+                    <TextField
+                      label="提醒邮箱"
+                      value={draft.reminderEmail}
+                      onChange={(value) => updateDraft(index, 'reminderEmail', value)}
+                      placeholder="you@example.com"
+                      type="email"
+                    />
+                    <NumberField
+                      label="使用年限"
+                      value={draft.usagePeriodYears}
+                      onChange={(value) => updateDraft(index, 'usagePeriodYears', value)}
+                      min={1}
+                      max={100}
+                    />
+                    <NumberField
+                      label="提前提醒天数"
+                      value={draft.reminderDaysOffset}
+                      onChange={(value) => updateDraft(index, 'reminderDaysOffset', value)}
+                      min={1}
+                      max={365}
+                    />
+                    <NumberField
+                      label="提醒次数"
+                      value={draft.reminderCount}
+                      onChange={(value) => updateDraft(index, 'reminderCount', value)}
+                      min={1}
+                      max={30}
+                    />
+                  </div>
+
+                  {draft.sourceSnippet && (
+                    <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                      来源片段：{draft.sourceSnippet}
+                    </div>
+                  )}
+
+                  {!!draft.warnings.length && (
+                    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      {draft.warnings.map((warning) => (
+                        <div key={warning}>{warning}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <FormError error={error} />
 
@@ -973,15 +1524,13 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
           >
             {result ? '关闭' : '取消'}
           </button>
-          {!result && (
-            <button
-              type="submit"
-              disabled={loading || !file}
-              className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? '导入中...' : '开始导入'}
-            </button>
-          )}
+          <button
+            type="submit"
+            disabled={isPrimaryDisabled}
+            className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {primaryButtonLabel}
+          </button>
         </div>
       </form>
     </ModalShell>

@@ -15,6 +15,9 @@ export interface Env {
   KV: KVNamespace;
   ADMIN_PASSWORD: string;
   ENCRYPTION_KEY: string;
+  ZAI_API_KEY?: string;
+  ZAI_BASE_URL?: string;
+  ZAI_VISION_MODEL?: string;
 }
 
 // Initialize Hono app
