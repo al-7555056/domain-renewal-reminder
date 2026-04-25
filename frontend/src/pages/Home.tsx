@@ -1,39 +1,41 @@
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/logo';
 
-const heroSignals = [
-  '30 / 15 / 7 天分级提醒',
-  '手动、CSV、AI 导入',
-  '状态、责任人、日志同步',
-];
+const heroSignals = ['分级提醒', 'CSV / AI 导入', '状态同步'];
 
-const dashboardStats = [
-  { value: '24', label: '待关注域名' },
-  { value: '08', label: '提醒中' },
-  { value: '03', label: '今日续费完成' },
-];
-
-const reminderQueue = [
-  { domain: 'aiziyou.com', meta: '2026-05-03 到期', status: '提醒中' },
-  { domain: 'studio-notes.cn', meta: '2026-05-18 到期', status: '待确认' },
-  { domain: 'client-landing.io', meta: '2026-06-02 到期', status: '已续费' },
+const heroPanels = [
+  {
+    label: '资产清单',
+    title: '统一管理域名资产',
+    description: '域名、到期日、注册商与备注集中归档。',
+  },
+  {
+    label: '提醒策略',
+    title: '自动进入提醒周期',
+    description: '按到期日生成提醒节奏，减少人工跟踪。',
+  },
+  {
+    label: '续费状态',
+    title: '处理过程实时留痕',
+    description: '责任人、状态与结果保持同步。',
+  },
 ];
 
 const capabilities = [
   {
     badge: 'Assets',
     title: '统一资产视图',
-    description: '域名、到期日、注册商与备注统一归档。',
+    description: '域名资产集中整理，信息结构更清晰。',
   },
   {
     badge: 'Automation',
     title: '自动提醒引擎',
-    description: '按策略巡检并触发续费提醒。',
+    description: '提醒节奏自动计算，减少重复操作。',
   },
   {
     badge: 'Collaboration',
     title: '协作状态同步',
-    description: '状态、责任人与处理结果实时留痕。',
+    description: '处理人与续费结果统一留痕。',
   },
 ];
 
@@ -84,12 +86,8 @@ export function Home() {
             <div className="hero-stage__grid">
               <div className="hero-stage__copy">
                 <div className="hero-stage__eyebrow">Domain Renewal Control</div>
-                <h1 id="hero-title" className="hero-stage__title">
-                  优雅管理每一个
-                  <br />
-                  域名续费周期
-                </h1>
-                <p className="hero-stage__description">一个控制台，统一资产、提醒与续费状态。</p>
+                <h1 id="hero-title" className="hero-stage__title">收拢域名资产，稳定管理续费周期</h1>
+                <p className="hero-stage__description">一个页面完成资产整理、提醒触发与状态同步。</p>
 
                 <div className="landing-actions hero-stage__actions">
                   <Link to="/register" className="primary-button">
@@ -101,45 +99,22 @@ export function Home() {
                 </div>
               </div>
 
-              <aside className="hero-console" aria-label="Product preview">
-                <div className="hero-console__top">
+              <aside className="hero-console hero-console--compact" aria-label="Product structure preview">
+                <div className="hero-console__top hero-console__top--compact">
                   <div>
-                    <div className="hero-console__eyebrow">Live board preview</div>
-                    <h2>关键提醒，一屏掌握</h2>
-                  </div>
-                  <div className="liquid-status-pill">
-                    <span className="liquid-status-pill__dot" aria-hidden="true" />
-                    自动巡检运行中
+                    <div className="hero-console__eyebrow">Product Structure</div>
+                    <h2>更少页面，更清晰的续费视图</h2>
                   </div>
                 </div>
 
-                <div className="hero-console__stats" aria-label="Preview metrics">
-                  {dashboardStats.map((item) => (
-                    <div key={item.label} className="hero-console__stat">
-                      <strong>{item.value}</strong>
-                      <span>{item.label}</span>
-                    </div>
+                <div className="hero-console__stack">
+                  {heroPanels.map((item) => (
+                    <article key={item.label} className="hero-console__panel">
+                      <div className="hero-console__panel-label">{item.label}</div>
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
+                    </article>
                   ))}
-                </div>
-
-                <div className="preview-board hero-console__board">
-                  <div className="preview-board__header">
-                    <strong>续费队列</strong>
-                    <span>今日同步</span>
-                  </div>
-                  <ul className="preview-queue">
-                    {reminderQueue.map((item) => (
-                      <li key={item.domain} className="preview-queue__item">
-                        <div className="preview-queue__main">
-                          <strong>{item.domain}</strong>
-                          <span>{item.meta}</span>
-                        </div>
-                        <div className="preview-queue__meta">
-                          <span className="preview-status-tag">{item.status}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               </aside>
             </div>
@@ -159,60 +134,50 @@ export function Home() {
           className="landing-section landing-section--compact animate-slideUp"
           aria-labelledby="capabilities-title"
         >
-          <div className="landing-section__heading landing-section__heading--centered">
-            <div className="liquid-chip">Core</div>
-            <h2 id="capabilities-title">少量页面，覆盖完整续费流程</h2>
-            <p>聚焦资产管理、自动提醒与协作同步。</p>
-          </div>
-
-          <div className="landing-feature-grid">
-            {capabilities.map((item) => (
-              <article key={item.title} className="liquid-card compact-card">
-                <div className="liquid-card__badge">{item.badge}</div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="feature-rail liquid-panel liquid-panel--feature animate-fadeIn">
-            <div className="feature-rail__header">
-              <div className="liquid-chip">Flow</div>
-              <h3>导入到续费接续，全链路自动衔接</h3>
+          <div className="single-sheet liquid-panel liquid-panel--feature">
+            <div className="landing-section__heading landing-section__heading--centered single-sheet__heading">
+              <div className="liquid-chip">Core</div>
+              <h2 id="capabilities-title">两大分块，覆盖完整续费流程</h2>
+              <p>保留必要信息，压缩页面长度，提升浏览效率。</p>
             </div>
-            <div className="ops-strip" aria-label="Process steps">
-              {flowSteps.map((item) => (
-                <span key={item} className="ops-pill">
-                  {item}
-                </span>
+
+            <div className="landing-feature-grid landing-feature-grid--tight">
+              {capabilities.map((item) => (
+                <article key={item.title} className="liquid-card compact-card compact-card--tight">
+                  <div className="liquid-card__badge">{item.badge}</div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </article>
               ))}
             </div>
-            <div className="feature-tags" aria-label="System tags">
-              {systemTags.map((item) => (
-                <span key={item} className="feature-tag">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        <section className="landing-section animate-slideUp" aria-labelledby="cta-title">
-          <div className="liquid-panel liquid-panel--cta">
-            <div>
-              <div className="liquid-chip liquid-chip--soft">Ready</div>
-              <h2 id="cta-title" className="landing-cta__title">
-                把域名续费管理交给系统
-              </h2>
-              <p className="landing-cta__text">现在开始建立你的域名控制台。</p>
-            </div>
-            <div className="landing-actions landing-actions--compact">
-              <Link to="/register" className="primary-button">
-                立即注册
-              </Link>
-              <Link to="/login" className="secondary-button">
-                立即登录
-              </Link>
+            <div className="feature-rail feature-rail--compact">
+              <div className="feature-rail__header">
+                <div className="liquid-chip">Flow</div>
+                <h3>导入到续费接续，全链路自动衔接</h3>
+              </div>
+              <div className="ops-strip" aria-label="Process steps">
+                {flowSteps.map((item) => (
+                  <span key={item} className="ops-pill">
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <div className="feature-tags" aria-label="System tags">
+                {systemTags.map((item) => (
+                  <span key={item} className="feature-tag">
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <div className="single-sheet__actions">
+                <Link to="/register" className="primary-button">
+                  立即注册
+                </Link>
+                <Link to="/login" className="secondary-button">
+                  立即登录
+                </Link>
+              </div>
             </div>
           </div>
         </section>
