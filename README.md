@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD033 -->
 # 爱自由域名管理 / Domain Renewal Reminder Service
 
 <div align="center">
@@ -15,6 +16,14 @@
 
 ---
 
+## 📸 界面预览
+
+| 用户面板 | AI 智能导入 | 后台邮箱配置 |
+| --- | --- | --- |
+| ![用户面板](docs/screenshots/user-dashboard.png) | ![导入域名](docs/screenshots/import-domains.png) | ![邮箱配置](docs/screenshots/admin-email-config.png) |
+
+---
+
 ## 中文
 
 ### 📖 简介
@@ -22,6 +31,7 @@
 爱自由域名管理是一个免费的 Web 应用，帮助用户统一管理域名续费时间、提醒计划和邮件通知。系统会自动计算到期日期，并通过定时邮件提醒机制降低域名过期风险。
 
 **核心特性：**
+
 - ✅ 用户注册、登录和邮箱验证
 - ✅ 域名管理（添加、编辑、删除、批量导入）
 - ✅ AI 智能导入（支持图片识别和文字解析后确认导入）
@@ -40,6 +50,7 @@
 ### 🏗️ 技术栈
 
 **后端：**
+
 - Cloudflare Workers
 - Hono
 - TypeScript
@@ -48,6 +59,7 @@
 - Cloudflare Cron Triggers
 
 **前端：**
+
 - React 19
 - Vite
 - Tailwind CSS
@@ -55,6 +67,7 @@
 - React Router
 
 **安全：**
+
 - PBKDF2 密码哈希（Web Crypto API）
 - AES-256-GCM 数据加密
 - 会话管理
@@ -63,6 +76,7 @@
 ### 🚀 快速开始
 
 **推荐部署顺序：**
+
 1. 先部署后端 → [完整部署指南](DEPLOYMENT_GUIDE.md)
 2. 再部署前端 → [Git 集成部署](GIT_DEPLOYMENT_GUIDE.md)
 3. 配置邮件服务 → [邮件服务配置](EMAIL_SETUP.md)
@@ -121,8 +135,9 @@ npm run dev
 ```
 
 访问地址：
-- 前端：http://localhost:5173
-- 后端：http://localhost:8787
+
+- 前端：<http://localhost:5173>
+- 后端：<http://localhost:8787>
 
 #### 运行测试
 
@@ -165,12 +180,14 @@ domain-renewal-reminder/
 #### 方式一：HTTP API（推荐）
 
 支持：
+
 - Resend
 - SendGrid
 - Mailgun
 - 自定义 HTTP API
 
 **优点：**
+
 - ✅ 配置简单
 - ✅ 稳定性高
 - ✅ 免费额度适合个人使用
@@ -179,11 +196,13 @@ domain-renewal-reminder/
 #### 方式二：SMTP（高级）
 
 支持端口：
+
 - 465（SSL）
 - 587（TLS）
 - ❌ 25（Cloudflare Workers 不支持）
 
 适合：
+
 - 企业邮箱
 - 自建邮件服务器
 - 需要使用固定 SMTP 服务商的场景
@@ -192,7 +211,7 @@ domain-renewal-reminder/
 
 ### 🤖 AI 智能导入
 
-仪表盘中的“批量导入 / AI 识别”现已支持三种来源：
+仪表盘中的"批量导入 / AI 识别"现已支持三种来源：
 
 - CSV 模板导入
 - 粘贴注册商列表、账单或提醒邮件文字
@@ -200,7 +219,7 @@ domain-renewal-reminder/
 - 最近识别历史、成功草稿载入和文字来源失败重试
 - 常见注册商自动补全续费入口（Cloudflare、GoDaddy、Namecheap、Spaceship、Porkbun）
 
-AI 识别流程采用“先识别、后确认、再入库”的方式：
+AI 识别流程采用"先识别、后确认、再入库"的方式：
 
 - 后端通过 Cloudflare Worker 调用智谱国际版 `https://api.z.ai/api/paas/v4/chat/completions`
 - 默认视觉模型为 `GLM-4.6V-Flash`
@@ -276,11 +295,13 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 ### 📊 数据库设计
 
 **users 表：**
+
 - 用户信息
 - 邮箱验证状态
 - 黑名单状态
 
 **domains 表：**
+
 - 域名基础信息
 - 到期日期和提醒设置
 - 提醒发送记录
@@ -288,9 +309,11 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 - 负责人、备注、处理时间
 
 **admin_logs 表：**
+
 - 管理员操作日志
 
 **email_send_logs 表：**
+
 - 发信记录
 - 触发来源
 - 失败原因
@@ -298,6 +321,7 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 ### 🎯 API 端点
 
 #### 认证
+
 - `POST /api/auth/register`
 - `POST /api/auth/verify`
 - `POST /api/auth/login`
@@ -306,6 +330,7 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 - `POST /api/auth/resend-verification`
 
 #### 域名管理
+
 - `POST /api/domains`
 - `POST /api/domains/batch`
 - `GET /api/domains`
@@ -319,6 +344,7 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 - `POST /api/domains/ai-history/:id/mark-imported`
 
 #### 管理员
+
 - `GET /api/admin/users`
 - `POST /api/admin/users/:id/blacklist`
 - `DELETE /api/admin/users/:id`
@@ -331,6 +357,7 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 ### 💰 成本估算
 
 基于 Cloudflare 免费套餐：
+
 - **Workers**：100,000 请求/天
 - **D1**：5GB 存储
 - **KV**：100,000 读取/天，1,000 写入/天
@@ -345,6 +372,7 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 ### 📞 支持
 
 如果遇到问题：
+
 1. 查看 [部署指南](DEPLOYMENT_GUIDE.md)
 2. 查看 [邮件配置文档](EMAIL_SETUP.md)
 3. 提交 GitHub Issue
@@ -358,6 +386,7 @@ wrangler d1 execute domain_renewal_db --remote --file=migrations/0005_ai_import_
 Domain Renewal Reminder Service is a free web application for managing domain renewals, reminder schedules, and email notifications. It helps users avoid accidental domain expiration with automated reminder workflows.
 
 **Core Features:**
+
 - ✅ User registration, login, and email verification
 - ✅ Domain CRUD and batch import
 - ✅ Automatic expiry and reminder date calculation
@@ -375,6 +404,7 @@ Domain Renewal Reminder Service is a free web application for managing domain re
 ### 🏗️ Tech Stack
 
 **Backend:**
+
 - Cloudflare Workers
 - Hono
 - TypeScript
@@ -383,6 +413,7 @@ Domain Renewal Reminder Service is a free web application for managing domain re
 - Cloudflare Cron Triggers
 
 **Frontend:**
+
 - React 19
 - Vite
 - Tailwind CSS
@@ -436,6 +467,7 @@ This project is licensed under the [MIT License](LICENSE).
 ### 📞 Support
 
 If you run into issues:
+
 1. Check [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 2. Check [EMAIL_SETUP.md](EMAIL_SETUP.md)
 3. Open a GitHub Issue
