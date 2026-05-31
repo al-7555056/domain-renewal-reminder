@@ -128,9 +128,9 @@ function RemainingBadge({ daysLeft }: { daysLeft: number }) {
 
 function InfoItem({ label, value, breakAll }: { label: string; value: string; breakAll?: boolean }) {
   return (
-    <div className="rounded-xl bg-white/70 px-3 py-3">
-      <div className="text-xs font-medium text-gray-500">{label}</div>
-      <div className={`mt-1 text-sm font-semibold text-gray-900 ${breakAll ? 'break-all' : ''}`}>{value}</div>
+    <div className="rounded-lg bg-white/70 px-2.5 py-2.5 dark:bg-gray-800/70 sm:rounded-xl sm:px-3 sm:py-3">
+      <div className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</div>
+      <div className={`mt-0.5 text-xs font-semibold text-gray-900 dark:text-gray-100 sm:mt-1 sm:text-sm ${breakAll ? 'break-all' : ''}`}>{value}</div>
     </div>
   );
 }
@@ -149,20 +149,20 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
   const progress = Math.min(100, Math.round((domain.reminders_sent / domain.reminder_count) * 100));
 
   return (
-    <div className="glass-card rounded-2xl border border-white/40 p-4 shadow-lg sm:p-5 lg:p-6">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="glass-card rounded-2xl border border-white/40 p-3 shadow-lg sm:p-4 lg:p-6">
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="break-all text-lg font-bold text-gray-900">{domain.domain_address}</h3>
+              <h3 className="break-all text-base font-bold text-gray-900 dark:text-gray-100 sm:text-lg">{domain.domain_address}</h3>
               <StatusBadge status={domain.status} />
             </div>
-            <div className="mt-1 break-all text-sm text-gray-500">{domain.renewal_url}</div>
+            <div className="mt-1 break-all text-xs text-gray-500 dark:text-gray-400 sm:text-sm">{domain.renewal_url}</div>
           </div>
           <RemainingBadge daysLeft={daysLeft} />
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
           <InfoItem label="到期日期" value={formatDate(domain.expiry_date)} />
           <InfoItem label="提醒开始" value={formatDate(domain.reminder_start_date)} />
           <InfoItem label="提醒邮箱" value={domain.reminder_email} breakAll />
@@ -177,21 +177,21 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
         )}
 
         {domain.status_note && (
-          <div className="rounded-xl border border-gray-200 bg-white/70 px-3 py-2 text-sm text-gray-600">
+          <div className="rounded-xl border border-gray-200 bg-white/70 px-3 py-2 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-300">
             备注：{domain.status_note}
           </div>
         )}
 
         {domain.last_renewed_at && (
-          <div className="text-sm font-medium text-emerald-600">上次续费：{formatDate(domain.last_renewed_at)}</div>
+          <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">上次续费：{formatDate(domain.last_renewed_at)}</div>
         )}
 
         <div>
-          <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
+          <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>提醒发送进度</span>
             <span>{progress}%</span>
           </div>
-          <div className="h-2 rounded-full bg-gray-200">
+          <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700">
             <div
               className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -199,71 +199,111 @@ function DomainCard({ domain, onRenew, onHandle, onStatusChange, onEdit, onDelet
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200/80 bg-white/45 p-3 sm:p-4">
-          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="rounded-2xl border border-gray-200/80 bg-white/45 p-2.5 sm:p-3 lg:p-4 dark:border-gray-700/80 dark:bg-gray-800/45">
+          <div className="mb-2.5 flex flex-col gap-2 sm:mb-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-gray-800">操作区</div>
-              <div className="text-xs text-gray-500">常用操作优先展示，其他管理操作保持收敛。</div>
+              <div className="text-xs font-semibold text-gray-800 dark:text-gray-200 sm:text-sm">操作区</div>
+              <div className="hidden text-xs text-gray-500 dark:text-gray-400 sm:block">常用操作优先展示，其他管理操作保持收敛。</div>
             </div>
-            <div className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+            <div className="hidden items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400 sm:inline-flex">
               续费工作流
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 lg:grid-cols-3 2xl:grid-cols-6">
           <button
             type="button"
             onClick={() => onRenew(domain)}
-            className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100"
+            className="rounded-lg bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 transition-all hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
           >
-            续费并重置提醒
+            <span className="hidden sm:inline">续费并重置提醒</span>
+            <span className="sm:hidden">续费重置</span>
           </button>
           <button
             type="button"
             onClick={() => onHandle(domain)}
-            className="rounded-xl bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition-all hover:bg-sky-100"
+            className="rounded-lg bg-sky-50 px-2.5 py-2 text-xs font-semibold text-sky-700 transition-all hover:bg-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:hover:bg-sky-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
           >
-            标记已处理
+            <span className="hidden sm:inline">标记已处理</span>
+            <span className="sm:hidden">已处理</span>
           </button>
           {domain.status === 'active' ? (
             <button
               type="button"
               onClick={() => onStatusChange(domain, 'paused')}
-              className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-100"
+              className="rounded-lg bg-amber-50 px-2.5 py-2 text-xs font-semibold text-amber-700 transition-all hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
             >
-              暂停提醒
+              <span className="hidden sm:inline">暂停提醒</span>
+              <span className="sm:hidden">暂停</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={() => onStatusChange(domain, 'active')}
-              className="rounded-xl bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-700 transition-all hover:bg-teal-100"
+              className="rounded-lg bg-teal-50 px-2.5 py-2 text-xs font-semibold text-teal-700 transition-all hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400 dark:hover:bg-teal-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
             >
-              恢复提醒
+              <span className="hidden sm:inline">恢复提醒</span>
+              <span className="sm:hidden">恢复</span>
             </button>
           )}
           {domain.status !== 'abandoned' && (
             <button
               type="button"
               onClick={() => onStatusChange(domain, 'abandoned')}
-              className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition-all hover:bg-rose-100"
+              className="rounded-lg bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-700 transition-all hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
             >
-              标记已放弃
+              <span className="hidden sm:inline">标记已放弃</span>
+              <span className="sm:hidden">已放弃</span>
             </button>
           )}
           <button
             type="button"
             onClick={() => onEdit(domain)}
-            className="rounded-xl bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-100"
+            className="rounded-lg bg-indigo-50 px-2.5 py-2 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
           >
             编辑
           </button>
           <button
             type="button"
             onClick={() => onDelete(domain)}
-            className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition-all hover:bg-red-100"
+            className="rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-700 transition-all hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm"
           >
             删除
           </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DomainCardSkeleton() {
+  return (
+    <div className="glass-card rounded-2xl border border-white/40 p-4 shadow-lg sm:p-5 lg:p-6 animate-pulse">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64"></div>
+          </div>
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-full w-20"></div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl bg-white/70 dark:bg-gray-800/70 px-3 py-3">
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+            </div>
+          ))}
+        </div>
+
+        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+
+        <div className="rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-white/45 dark:bg-gray-800/45 p-3 sm:p-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -282,6 +322,15 @@ export function Dashboard() {
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<Domain | null>(null);
   const [banner, setBanner] = useState<BannerState | null>(null);
+
+  useEffect(() => {
+    if (banner) {
+      const timer = setTimeout(() => {
+        setBanner(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [banner]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -473,7 +522,7 @@ export function Dashboard() {
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-100/80 hover:text-gray-900 sm:w-auto"
+              className="w-full rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-100/80 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 sm:w-auto"
             >
               退出登录
             </button>
@@ -482,28 +531,38 @@ export function Dashboard() {
       </header>
 
       <main className="app-main">
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <StatCard label="域名总数" value={String(totalDomains)} />
-          <StatCard label="提醒中" value={String(activeCount)} accent="emerald" />
-          <StatCard label="已处理" value={String(handledCount)} accent="indigo" />
-          <StatCard label="已暂停" value={String(pausedCount)} accent="amber" />
-          <StatCard label="已放弃" value={String(abandonedCount)} accent="rose" />
-        </div>
+        {loading && domains.length === 0 ? (
+          <>
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <StatCardSkeleton key={i} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <StatCard label="域名总数" value={String(totalDomains)} />
+            <StatCard label="提醒中" value={String(activeCount)} accent="emerald" />
+            <StatCard label="已处理" value={String(handledCount)} accent="indigo" />
+            <StatCard label="已暂停" value={String(pausedCount)} accent="amber" />
+            <StatCard label="已放弃" value={String(abandonedCount)} accent="rose" />
+          </div>
+        )}
 
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">我的域名</h2>
-          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">我的域名</h2>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto">
             <button
               type="button"
               onClick={() => setShowAddModal(true)}
-              className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 sm:flex-none"
+              className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 sm:px-5 sm:py-3"
             >
               添加域名
             </button>
             <button
               type="button"
               onClick={() => setShowBatchImportModal(true)}
-              className="flex-1 rounded-xl border-2 border-indigo-600 px-5 py-3 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-50 sm:flex-none"
+              className="rounded-xl border-2 border-indigo-600 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition-all hover:bg-indigo-50 dark:border-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-900/30 sm:px-5 sm:py-3"
             >
               批量导入
             </button>
@@ -512,42 +571,63 @@ export function Dashboard() {
 
         {banner && (
           <div
-            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium ${
+            className={`mb-4 flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg ${
               banner.tone === 'success'
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                : 'border-red-200 bg-red-50 text-red-700'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400'
             }`}
           >
-            {banner.text}
+            <div className="flex items-start gap-3">
+              {banner.tone === 'success' ? (
+                <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              <span>{banner.text}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBanner(null)}
+              className="flex-shrink-0 rounded-lg p-1 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+              aria-label="关闭提示"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         )}
 
-        <div className="glass-card mb-6 rounded-2xl p-5 shadow-lg">
-          <div className="mb-5">
-            <label className="mb-2 block text-sm font-semibold text-gray-700">搜索域名</label>
+        <div className="glass-card mb-6 rounded-2xl p-4 shadow-lg sm:p-5">
+          <div className="mb-4 sm:mb-5">
+            <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">搜索域名</label>
             <input
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="搜索域名、续费地址或提醒邮箱"
-              className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100 dark:placeholder-gray-400 sm:py-3"
             />
           </div>
 
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-base font-semibold text-gray-900">筛选与视图</div>
-            <div className="grid grid-cols-2 gap-2 sm:flex">
+          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 sm:text-base">筛选与视图</div>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                className={`rounded-lg px-3 py-2 text-sm font-medium sm:px-4 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
               >
                 列表
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('grouped')}
-                className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === 'grouped' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                className={`rounded-lg px-3 py-2 text-sm font-medium sm:px-4 ${viewMode === 'grouped' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
               >
                 分组
               </button>
@@ -600,9 +680,10 @@ export function Dashboard() {
         </div>
 
         {loading ? (
-          <div className="py-16 text-center">
-            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
-            <p className="mt-4 text-sm font-medium text-gray-600">加载中...</p>
+          <div className="space-y-4 sm:space-y-5">
+            {[1, 2, 3].map((i) => (
+              <DomainCardSkeleton key={i} />
+            ))}
           </div>
         ) : domains.length === 0 ? (
           <EmptyState
@@ -655,27 +736,27 @@ export function Dashboard() {
         )}
 
         {!loading && filteredDomains.length > 0 && totalPages > 1 && (
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-gray-600">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-xs text-gray-600 dark:text-gray-400 sm:text-sm">
               显示第 {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalDomains)} 条，共 {totalDomains} 条
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                 disabled={currentPage === 1}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:px-4 sm:text-sm"
               >
                 上一页
               </button>
-              <span className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700">
-                第 {currentPage} / {totalPages} 页
+              <span className="rounded-lg bg-white px-3 py-2 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300 sm:px-4 sm:text-sm">
+                {currentPage} / {totalPages}
               </span>
               <button
                 type="button"
                 onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
                 disabled={currentPage === totalPages}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:px-4 sm:text-sm"
               >
                 下一页
               </button>
@@ -698,6 +779,16 @@ export function Dashboard() {
   );
 }
 
+function StatCardSkeleton() {
+  return (
+    <div className="glass-card rounded-2xl p-4 shadow-lg sm:p-5 animate-pulse">
+      <div className="mb-4 h-11 w-11 rounded-xl bg-gray-200 dark:bg-gray-700 sm:h-12 sm:w-12"></div>
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
+      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+    </div>
+  );
+}
+
 function StatCard({ label, value, accent = 'indigo' }: { label: string; value: string; accent?: 'indigo' | 'emerald' | 'amber' | 'rose' }) {
   const accentMap = {
     indigo: 'from-indigo-500 to-purple-600',
@@ -713,8 +804,8 @@ function StatCard({ label, value, accent = 'indigo' }: { label: string; value: s
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <div className="text-sm font-semibold text-gray-600">{label}</div>
-      <div className="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">{value}</div>
+      <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">{label}</div>
+      <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">{value}</div>
     </div>
   );
 }
@@ -732,11 +823,12 @@ function FilterSelect({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-gray-700">{label}</label>
+      <label htmlFor={`filter-${label}`} className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</label>
       <select
+        id={`filter-${label}`}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100"
       >
         {options.map((option) => (
           <option key={`${label}-${option.value || 'all'}`} value={option.value}>
@@ -1137,6 +1229,50 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
     }
   };
 
+  const handleDeleteHistory = async (id: string) => {
+    if (!window.confirm('确认删除这条识别历史？')) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.deleteAiImportHistory(id);
+      if (response.success) {
+        await loadHistory();
+        if (currentHistoryId === id) {
+          setDrafts([]);
+          setParseWarnings([]);
+          setParsedModel('');
+          setCurrentHistoryId(null);
+        }
+      } else {
+        setError(response.error?.message || '删除历史失败。');
+      }
+    } catch {
+      setError('网络错误，删除历史未完成。');
+    }
+  };
+
+  const handleClearHistory = async () => {
+    if (!window.confirm('确认清空所有识别历史？此操作无法撤销。')) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.clearAiImportHistory();
+      if (response.success) {
+        await loadHistory();
+        setDrafts([]);
+        setParseWarnings([]);
+        setParsedModel('');
+        setCurrentHistoryId(null);
+      } else {
+        setError(response.error?.message || '清空历史失败。');
+      }
+    } catch {
+      setError('网络错误，清空历史未完成。');
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -1214,8 +1350,9 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
             </button>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">选择 CSV 文件</label>
+              <label htmlFor="csv-file-input" className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">选择 CSV 文件</label>
               <input
+                id="csv-file-input"
                 type="file"
                 accept=".csv"
                 onChange={(event) => {
@@ -1223,7 +1360,7 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
                   setCsvFile(selected);
                   clearFeedback();
                 }}
-                className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm"
+                className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100"
               />
             </div>
           </>
@@ -1284,8 +1421,9 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
               />
             ) : (
               <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">上传截图或账单图片</label>
+                <label htmlFor="image-file-input" className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">上传截图或账单图片</label>
                 <input
+                  id="image-file-input"
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={(event) => {
@@ -1295,31 +1433,42 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
                     setParseWarnings([]);
                     clearFeedback();
                   }}
-                  className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm"
+                  className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100"
                 />
-                <p className="mt-2 text-xs text-gray-500">建议使用清晰截图，优先包含域名、到期日期、续费入口或提醒邮箱等关键信息。</p>
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">建议使用清晰截图，优先包含域名、到期日期、续费入口或提醒邮箱等关键信息。</p>
               </div>
             )}
           </>
         )}
 
-        <div className="rounded-2xl border border-gray-200 bg-white/80 p-4">
-          <div className="mb-3 flex items-center justify-between">
+        <div className="rounded-2xl border border-gray-200 bg-white/80 p-3 dark:border-gray-700 dark:bg-gray-800/80 sm:p-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-gray-900">最近识别历史</div>
-              <div className="text-xs text-gray-500">仅保存识别摘要和草稿，不长期保存原始图片内容。</div>
+              <div className="text-xs font-semibold text-gray-900 dark:text-gray-100 sm:text-sm">最近识别历史</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">仅保存识别摘要和草稿，不长期保存原始图片内容。</div>
             </div>
-            <button
-              type="button"
-              onClick={() => void loadHistory()}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50"
-            >
-              刷新
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => void loadHistory()}
+                className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 sm:px-3 sm:py-2"
+              >
+                刷新
+              </button>
+              {historyItems.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void handleClearHistory()}
+                  className="rounded-lg border border-red-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-700 transition-all hover:bg-red-50 dark:border-red-800 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30 sm:px-3 sm:py-2"
+                >
+                  清空
+                </button>
+              )}
+            </div>
           </div>
 
           {loadingHistory ? (
-            <div className="text-sm text-gray-500">历史加载中...</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">历史加载中...</div>
           ) : historyItems.length === 0 ? (
             <EmptyStatePanel
               title="还没有 AI 识别历史"
@@ -1329,57 +1478,64 @@ mydomain.net,https://registrar.com/renew,2023-06-15,2,60,admin@mydomain.net,5`;
               className="border-gray-200 bg-gray-50/70 shadow-none dark:border-gray-700 dark:bg-gray-800/70"
             />
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {historyItems.map((item) => (
-                <div key={item.id} className="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div key={item.id} className="rounded-xl border border-gray-200 bg-gray-50/70 p-2.5 dark:border-gray-700 dark:bg-gray-800/70 sm:p-3">
+                  <div className="flex flex-col gap-2">
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="truncate text-sm font-semibold text-gray-900">{item.sourceLabel}</div>
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <div className="truncate text-xs font-semibold text-gray-900 dark:text-gray-100 sm:text-sm">{item.sourceLabel}</div>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
                             item.status === 'failed'
-                              ? 'bg-red-100 text-red-700'
+                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                               : item.status === 'imported'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-indigo-100 text-indigo-700'
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
                           }`}
                         >
                           {item.status === 'failed' ? '失败' : item.status === 'imported' ? '已导入' : '成功'}
                         </span>
-                        <span className="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
+                        <span className="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
                           {item.sourceType === 'image' ? '图片' : '文字'}
                         </span>
                       </div>
-                      <div className="mt-1 text-xs text-gray-500">
+                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {formatDateTime(item.createdAt)}
                         {item.model ? ` · ${item.model}` : ''}
-                        {item.resultCount > 0 ? ` · ${item.resultCount} 条记录` : ''}
+                        {item.resultCount > 0 ? ` · ${item.resultCount} 条` : ''}
                       </div>
-                      {item.errorMessage && <div className="mt-2 text-sm text-red-600">{item.errorMessage}</div>}
+                      {item.errorMessage && <div className="mt-1.5 text-xs text-red-600 dark:text-red-400 sm:mt-2 sm:text-sm">{item.errorMessage}</div>}
                       {!item.errorMessage && item.warnings.length > 0 && (
-                        <div className="mt-2 text-sm text-amber-700">{item.warnings[0]}</div>
+                        <div className="mt-1.5 text-xs text-amber-700 dark:text-amber-400 sm:mt-2 sm:text-sm">{item.warnings[0]}</div>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
                       {item.canLoadDrafts && (
                         <button
                           type="button"
                           onClick={() => loadDraftsFromHistory(item)}
-                          className="rounded-lg border border-indigo-300 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-50"
+                          className="rounded-lg border border-indigo-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-50 dark:border-indigo-800 dark:bg-gray-800 dark:text-indigo-400 dark:hover:bg-indigo-900/30 sm:px-3 sm:py-2"
                         >
-                          载入草稿
+                          载入
                         </button>
                       )}
                       {item.canRetry && (
                         <button
                           type="button"
                           onClick={() => void handleRetryHistory(item)}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50"
+                          className="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 sm:px-3 sm:py-2"
                         >
                           重试
                         </button>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteHistory(item.id)}
+                        className="rounded-lg border border-red-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-700 transition-all hover:bg-red-50 dark:border-red-800 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30 sm:px-3 sm:py-2"
+                      >
+                        删除
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1697,16 +1853,16 @@ function ModalShell({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-0 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="glass-card max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
-        <div className="sticky top-0 flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-4 text-white">
-          <h3 className="text-lg font-bold">{title}</h3>
-          <button type="button" onClick={onClose} className="rounded-lg p-2 transition-all hover:bg-white/20">
+      <div className="glass-card max-h-[95vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-4 text-white sm:rounded-t-2xl sm:px-5">
+          <h3 className="text-base font-bold sm:text-lg">{title}</h3>
+          <button type="button" onClick={onClose} className="rounded-lg p-2 transition-all hover:bg-white/20" aria-label="关闭">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <div className="p-5 sm:p-6">{children}</div>
+        <div className="p-4 sm:p-6">{children}</div>
       </div>
     </div>
   );
@@ -1739,16 +1895,18 @@ function TextField({
   type?: string;
   disabled?: boolean;
 }) {
+  const id = `text-${label.replace(/\s+/g, '-').toLowerCase()}`;
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-gray-700">{label}</label>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</label>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-gray-100"
+        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100 dark:placeholder-gray-400 dark:disabled:bg-gray-800"
       />
     </div>
   );
@@ -1767,16 +1925,18 @@ function NumberField({
   min: number;
   max: number;
 }) {
+  const id = `number-${label.replace(/\s+/g, '-').toLowerCase()}`;
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-gray-700">{label}</label>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</label>
       <input
+        id={id}
         type="number"
         value={value}
         onChange={(event) => onChange(parseInt(event.target.value, 10))}
         min={min}
         max={max}
-        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100"
       />
     </div>
   );
@@ -1793,15 +1953,17 @@ function TextAreaField({
   onChange: (value: string) => void;
   placeholder?: string;
 }) {
+  const id = `textarea-${label.replace(/\s+/g, '-').toLowerCase()}`;
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-gray-700">{label}</label>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</label>
       <textarea
+        id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+        className="w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800/70 dark:text-gray-100 dark:placeholder-gray-400"
       />
     </div>
   );
@@ -1821,7 +1983,7 @@ function ModalActions({
       <button
         type="button"
         onClick={onClose}
-        className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50"
+        className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
       >
         取消
       </button>

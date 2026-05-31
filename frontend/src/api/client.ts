@@ -247,6 +247,18 @@ class ApiClient {
     });
   }
 
+  async deleteAiImportHistory(id: string) {
+    return this.request(`/domains/ai-history/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearAiImportHistory() {
+    return this.request('/domains/ai-history/clear', {
+      method: 'DELETE',
+    });
+  }
+
   async updateDomain(id: string, updates: Record<string, unknown>) {
     return this.request(`/domains/${id}`, {
       method: 'PUT',

@@ -251,6 +251,59 @@ domains.post('/ai-history/:id/mark-imported', async (c) => {
 });
 
 /**
+ * DELETE /domains/ai-history/clear
+ * Clear all AI import history entries for current user
+ */
+domains.delete('/ai-history/clear', async (c) => {
+  try {
+    const userId = c.get('userId') as string;
+    const historyService = new AiImportHistoryService(c.env.DB as D1Database);
+    const result = await historyService.clearHistory(userId);
+
+    return c.json(result, result.success ? 200 : 500);
+  } catch (error) {
+    console.error('Clear AI history route error:', error);
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'An error occurred while clearing AI history',
+        },
+      },
+      500
+    );
+  }
+});
+
+/**
+ * DELETE /domains/ai-history/:id
+ * Delete one AI import history entry for current user
+ */
+domains.delete('/ai-history/:id', async (c) => {
+  try {
+    const userId = c.get('userId') as string;
+    const historyId = c.req.param('id');
+    const historyService = new AiImportHistoryService(c.env.DB as D1Database);
+    const result = await historyService.deleteHistory(userId, historyId);
+
+    return c.json(result, result.success ? 200 : result.error?.code === 'AI_HISTORY_NOT_FOUND' ? 404 : 500);
+  } catch (error) {
+    console.error('Delete AI history route error:', error);
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'An error occurred while deleting AI history',
+        },
+      },
+      500
+    );
+  }
+});
+
+/**
  * POST /domains/batch
  * Batch add multiple domains
  */

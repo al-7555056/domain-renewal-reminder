@@ -157,6 +157,65 @@ export class AiImportHistoryService {
     }
   }
 
+  async deleteHistory(userId: string, historyId: string): Promise<ApiResponse> {
+    try {
+      const result = await this.db
+        .prepare('DELETE FROM ai_import_history WHERE id = ? AND user_id = ?')
+        .bind(historyId, userId)
+        .run();
+
+      if ((result.meta?.changes || 0) === 0) {
+        return {
+          success: false,
+          error: {
+            code: 'AI_HISTORY_NOT_FOUND',
+            message: 'AI history record not found',
+          },
+        };
+      }
+
+      return {
+        success: true,
+        message: 'AI import history deleted',
+      };
+    } catch (error) {
+      console.error('Delete AI import history failed:', error);
+      return {
+        success: false,
+        error: {
+          code: 'AI_HISTORY_DELETE_FAILED',
+          message: 'Failed to delete AI import history',
+        },
+      };
+    }
+  }
+
+  async clearHistory(userId: string): Promise<ApiResponse<{ deleted: number }>> {
+    try {
+      const result = await this.db
+        .prepare('DELETE FROM ai_import_history WHERE user_id = ?')
+        .bind(userId)
+        .run();
+
+      return {
+        success: true,
+        data: {
+          deleted: result.meta?.changes || 0,
+        },
+        message: 'AI import history cleared',
+      };
+    } catch (error) {
+      console.error('Clear AI import history failed:', error);
+      return {
+        success: false,
+        error: {
+          code: 'AI_HISTORY_CLEAR_FAILED',
+          message: 'Failed to clear AI import history',
+        },
+      };
+    }
+  }
+
   private toHistoryListItem(row: HistoryRow): HistoryListItem {
     const drafts = this.parseJson<AiImportDraft[]>(row.drafts_json, []);
     const warnings = this.parseJson<string[]>(row.warnings_json, []);
